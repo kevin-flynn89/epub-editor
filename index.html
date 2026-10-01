@@ -257,52 +257,79 @@ label.btn{display:inline-block;margin:0;text-align:center}
     say("Nuova copertina pronta: verrà applicata al salvataggio.");
   });
   function imgUrl(u) { return (u || "").replace(/^http:/, "https:"); }
+  var LANGS = { ita: "it", eng: "en", fre: "fr", fra: "fr", ger: "de", deu: "de", spa: "es", por: "pt", lat: "la" };
+
+  async function fromGoogle(t, a) {
+    var q = "intitle:" + t + (a ? " inauthor:" + a : "");
+    var r = await fetch("https://www.googleapis.com/books/v1/volumes?maxResults=6&printType=books&q=" + encodeURIComponent(q));
+    if (!r.ok) throw new Error("Google Books " + r.status);
+    return ((await r.json()).items || []).map(function (it) {
+      var v = it.volumeInfo || {}, l = v.imageLinks || {}, th = imgUrl(l.thumbnail || l.smallThumbnail);
+      return { title: v.title, authors: v.authors || [], publisher: v.publisher, language: v.language,
+        date: v.publishedDate, tags: v.categories || [], desc: plain(v.description),
+        thumb: th, cover: th && th.replace("zoom=1", "zoom=2") };
+    });
+  }
+
+  async function fromOpenLibrary(t, a) {
+    var u = "https://openlibrary.org/search.json?limit=6&fields=title,author_name,publisher,first_publish_year,language,subject,cover_i&title=" +
+      encodeURIComponent(t) + (a ? "&author=" + encodeURIComponent(a) : "");
+    var r = await fetch(u);
+    if (!r.ok) throw new Error("Open Library " + r.status);
+    return ((await r.json()).docs || []).map(function (d) {
+      var c = d.cover_i ? "https://covers.openlibrary.org/b/id/" + d.cover_i : "";
+      return { title: d.title, authors: d.author_name || [], publisher: (d.publisher || [])[0],
+        language: LANGS[(d.language || [])[0]] || "", date: d.first_publish_year ? String(d.first_publish_year) : "",
+        tags: (d.subject || []).slice(0, 5), desc: "", thumb: c && c + "-S.jpg", cover: c && c + "-L.jpg" };
+    });
+  }
 
   async function search() {
     var t = val("title"), a = split(val("authors"), ";")[0] || "", box = $("results");
     if (!t) { say("Scrivi almeno il titolo per cercare.", true); return; }
     say("Cerco online…"); box.innerHTML = "";
-    try {
-      var q = "intitle:" + t + (a ? " inauthor:" + a : "");
-      var r = await fetch("https://www.googleapis.com/books/v1/volumes?maxResults=6&printType=books&q=" + encodeURIComponent(q));
-      if (!r.ok) throw new Error(r.status);
-      var list = (await r.json()).items || [];
-      if (!list.length) { say("Nessun risultato. Prova a correggere titolo o autore."); return; }
-      say("Tocca un risultato per applicarlo ai campi.");
-      list.forEach(function (it) {
-        var v = it.volumeInfo || {}, b = document.createElement("button");
-        b.type = "button"; b.className = "hit";
-        var img = document.createElement("img"); img.alt = "";
-        if (v.imageLinks && v.imageLinks.thumbnail) img.src = imgUrl(v.imageLinks.thumbnail);
-        var txt = document.createElement("span"), h = document.createElement("strong"), sm = document.createElement("small");
-        h.textContent = v.title || "(senza titolo)";
-        sm.textContent = [(v.authors || []).join(", "), v.publisher, (v.publishedDate || "").slice(0, 4)].filter(Boolean).join(" – ");
-        txt.appendChild(h); txt.appendChild(sm); b.appendChild(img); b.appendChild(txt);
-        b.addEventListener("click", function () { applyHit(v); });
-        box.appendChild(b);
-      });
-    } catch (e) { say("Ricerca non riuscita. Controlla la connessione e riprova.", true); }
+    var errs = [], list = [];
+    try { list = await fromGoogle(t, a); } catch (e) { errs.push("Google Books: " + (e.message || "rete")); }
+    if (!list.length) {
+      try { list = await fromOpenLibrary(t, a); } catch (e) { errs.push("Open Library: " + (e.message || "rete")); }
+    }
+    if (!list.length) {
+      say(errs.length ? "Ricerca non riuscita (" + errs.join("; ") + ")." : "Nessun risultato. Prova a correggere titolo o autore.", !!errs.length);
+      return;
+    }
+    say("Tocca un risultato per applicarlo ai campi.");
+    list.forEach(function (v) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "hit";
+      var img = document.createElement("img"); img.alt = "";
+      if (v.thumb) img.src = v.thumb;
+      var txt = document.createElement("span"), h = document.createElement("strong"), sm = document.createElement("small");
+      h.textContent = v.title || "(senza titolo)";
+      sm.textContent = [v.authors.join(", "), v.publisher, (v.date || "").slice(0, 4)].filter(Boolean).join(" – ");
+      txt.appendChild(h); txt.appendChild(sm); b.appendChild(img); b.appendChild(txt);
+      b.addEventListener("click", function () { applyHit(v); });
+      box.appendChild(b);
+    });
   }
 
   async function applyHit(v) {
     function put(k, x) { if (x) $("f-" + k).value = x; }
-    put("title", v.title); put("authors", (v.authors || []).join("; "));
-    put("publisher", v.publisher); put("lang", v.language); put("date", v.publishedDate);
-    put("tags", (v.categories || []).join(", ")); put("desc", plain(v.description));
+    put("title", v.title); put("authors", v.authors.join("; ")); put("publisher", v.publisher);
+    put("lang", v.language); put("date", v.date); put("tags", v.tags.join(", ")); put("desc", v.desc);
     $("results").innerHTML = "";
-    var link = v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail);
-    if (!link) { say("Dati applicati. Controlla i campi e salva."); return; }
+    if (!v.cover) { say("Dati applicati. Controlla i campi e salva."); return; }
     try {
-      var rr = await fetch(imgUrl(link).replace("zoom=1", "zoom=2"));
+      var rr = await fetch(v.cover);
+      if (!rr.ok) throw new Error(rr.status);
       var bl = await rr.blob();
-      if (bl.type !== "image/jpeg" && bl.type !== "image/png") throw new Error("tipo");
+      if (bl.type !== "image/jpeg" && bl.type !== "image/png") throw new Error("tipo " + bl.type);
       newCover = bl;
       var fr = new FileReader();
       fr.onload = function () { $("cover").style.backgroundImage = "url(" + fr.result + ")"; };
       fr.readAsDataURL(bl);
       say("Dati e copertina applicati. Controlla i campi e salva.");
     } catch (e) {
-      say("Dati applicati. La copertina non si è potuta scaricare: puoi sceglierla con “Cambia copertina”.");
+      say("Dati applicati. Copertina non scaricata (" + (e.message || "rete") + "): puoi sceglierla con “Cambia copertina”.");
     }
   }
 

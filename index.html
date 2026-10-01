@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Editor metadati EPUB</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0e6e7e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:wght@600;700&family=Public+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f4;--panel:#fff;--ink:#16202b;--mute:#5d6b7a;--line:#d3dae1;--acc:#0e6e7e;--acc-ink:#fff;--err:#b3261e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f161d;--panel:#18222c;--ink:#e7edf2;--mute:#92a1b0;--line:#2b3947;--acc:#4fb3c4;--acc-ink:#06242a;--err:#ff8a80}}
+:root[data-theme="dark"]{--bg:#0f161d;--panel:#18222c;--ink:#e7edf2;--mute:#92a1b0;--line:#2b3947;--acc:#4fb3c4;--acc-ink:#06242a;--err:#ff8a80}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Public Sans",system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 40px}
+h1{font:700 1.7rem/1.2 Literata,Georgia,serif;margin:0 0 4px}
+.sub{color:var(--mute);margin:0 0 20px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:32px 16px;text-align:center;background:var(--panel);cursor:pointer}
+.drop.over,.drop:focus-visible{border-color:var(--acc);outline:none}
+.drop strong{display:block;font:600 1.15rem Literata,Georgia,serif;margin-bottom:4px}
+.drop span{color:var(--mute)}
+.book{display:none;margin-top:20px}
+.head{display:flex;gap:16px;align-items:flex-start}
+.cover{width:112px;flex:none;aspect-ratio:2/3;border-radius:2px 8px 8px 2px;background:var(--line) center/cover no-repeat;box-shadow:inset 7px 0 0 rgba(0,0,0,.2),0 2px 8px rgba(0,0,0,.25)}
+.head .info{min-width:0}
+.fname{font-weight:600;overflow-wrap:anywhere}
+.small{color:var(--mute);font-size:.88rem}
+label{display:block;font-weight:600;font-size:.92rem;margin:14px 0 4px}
+input[type=text],input[type=number],textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+textarea{min-height:130px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 100px;gap:12px}
+.check{display:flex;gap:8px;align-items:center;font-weight:400;margin-top:18px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.btn{font:600 1rem "Public Sans",system-ui,sans-serif;background:var(--acc);color:var(--acc-ink);border:1px solid var(--acc);border-radius:8px;padding:12px 18px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.msg{margin-top:14px;color:var(--mute);min-height:1.5em}
+.msg.err{color:var(--err)}
+#results{display:grid;gap:8px;margin-top:16px}
+.hit{display:flex;gap:12px;align-items:center;text-align:left;width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;cursor:pointer}
+.hit img{width:40px;height:60px;object-fit:cover;background:var(--line);border-radius:2px;flex:none}
+.hit span{display:grid;min-width:0}
+.hit small{color:var(--mute)}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+label.drop{margin:0;font-weight:400}
+label.btn{display:inline-block;margin:0;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <h1>Editor metadati EPUB</h1>
+  <p class="sub">Apri un EPUB, modifica titolo, autori, serie e copertina, poi salva. Il file resta sul tuo dispositivo.</p>
+
+  <label class="drop" id="drop" for="file">
+    <strong>Scegli un file EPUB</strong>
+    <span>Tocca qui oppure trascina il file</span>
+  </label>
+  <input type="file" id="file" class="vh">
+  <input type="file" id="coverfile" class="vh" accept="image/jpeg,image/png">
+
+  <section class="book" id="book">
+    <div class="head">
+      <div class="cover" id="cover"></div>
+      <div class="info">
+        <div class="fname" id="fname"></div>
+        <div class="small" id="fsize"></div>
+        <div class="actions" style="margin-top:12px">
+          <label class="btn ghost" for="coverfile">Cambia copertina</label>
+          <button class="btn" id="search" type="button">Cerca online</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="results"></div>
+    <label for="f-title">Titolo</label>
+    <input type="text" id="f-title">
+    <label for="f-authors">Autori <span class="small">(separati da punto e virgola)</span></label>
+    <input type="text" id="f-authors">
+    <div class="row">
+      <div><label for="f-series">Serie</label><input type="text" id="f-series"></div>
+      <div><label for="f-index">Numero</label><input type="number" id="f-index" step="any" min="0"></div>
+    </div>
+    <div class="row">
+      <div><label for="f-publisher">Editore</label><input type="text" id="f-publisher"></div>
+      <div><label for="f-lang">Lingua</label><input type="text" id="f-lang" placeholder="it"></div>
+    </div>
+    <label for="f-date">Data di pubblicazione</label>
+    <input type="text" id="f-date" placeholder="AAAA-MM-GG">
+    <label for="f-tags">Tag <span class="small">(separati da virgola)</span></label>
+    <input type="text" id="f-tags">
+    <label for="f-desc">Descrizione</label>
+    <textarea id="f-desc"></textarea>
+
+    <label class="check"><input type="checkbox" id="rename" checked> Rinomina il file come “Autore - Titolo”</label>
+
+    <div class="actions">
+      <button class="btn" id="save" type="button">Salva EPUB</button>
+      <button class="btn ghost" id="another" type="button">Apri un altro file</button>
+    </div>
+  </section>
+  <div class="msg" id="msg" role="status"></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(function () {
+  var DC = "http://purl.org/dc/elements/1.1/", OPF = "http://www.idpf.org/2007/opf";
+  var $ = function (id) { return document.getElementById(id); };
+  var zip, opfPath, doc, meta, fileName, initial = {}, newCover = null;
+  var ids = ["title", "authors", "series", "index", "publisher", "lang", "date", "tags", "desc"];
+
+  function say(t, err) { var m = $("msg"); m.textContent = t || ""; m.className = "msg" + (err ? " err" : ""); }
+  function dirOf(p) { return p.indexOf("/") >= 0 ? p.slice(0, p.lastIndexOf("/") + 1) : ""; }
+  function resolve(href) { return decodeURIComponent(new URL(href, "http://x/" + dirOf(opfPath)).pathname.slice(1)); }
+  function byNS(ns, n) { return Array.prototype.slice.call(meta.getElementsByTagNameNS(ns, n)); }
+  function dcv(n) { return byNS(DC, n).map(function (e) { return e.textContent.trim(); }).filter(Boolean); }
+  function metas() { return Array.prototype.slice.call(doc.getElementsByTagNameNS(OPF, "meta")); }
+  function cm(n) { var e = metas().filter(function (x) { return x.getAttribute("name") === n; })[0]; return e ? (e.getAttribute("content") || "") : ""; }
+  function items() { return Array.prototype.slice.call(doc.getElementsByTagNameNS(OPF, "item")); }
+  function coverItem() {
+    var id = cm("cover");
+    return items().filter(function (i) { return id && i.getAttribute("id") === id; })[0] ||
+      items().filter(function (i) { return (i.getAttribute("properties") || "").split(/\s+/).indexOf("cover-image") >= 0; })[0] || null;
+  }
+  function plain(s) { return s ? (new DOMParser().parseFromString(s, "text/html").body.textContent || "").trim() : ""; }
+
+  async function openFile(file) {
+    say("Apro il file…");
+    try {
+      if (typeof JSZip === "undefined") { say("Libreria non caricata. Ricarica la pagina.", true); return; }
+      zip = await JSZip.loadAsync(file);
+      var c = zip.file("META-INF/container.xml");
+      if (!c) throw new Error("container");
+      var cdoc = new DOMParser().parseFromString(await c.async("string"), "application/xml");
+      var rf = cdoc.getElementsByTagName("rootfile")[0];
+      opfPath = rf && rf.getAttribute("full-path");
+      if (!opfPath || !zip.file(opfPath)) throw new Error("opf");
+      doc = new DOMParser().parseFromString(await zip.file(opfPath).async("string"), "application/xml");
+      if (doc.getElementsByTagName("parsererror").length) throw new Error("xml");
+      meta = doc.getElementsByTagNameNS(OPF, "metadata")[0];
+      if (!meta) throw new Error("meta");
+    } catch (e) {
+      say("Questo file non sembra un EPUB valido. Scegli un altro file.", true);
+      return;
+    }
+    fileName = file.name; newCover = null;
+    initial = {
+      title: dcv("title")[0] || "",
+      authors: dcv("creator").join("; "),
+      series: cm("calibre:series"),
+      index: cm("calibre:series_index"),
+      publisher: dcv("publisher")[0] || "",
+      lang: dcv("language")[0] || "",
+      date: (dcv("date")[0] || "").slice(0, 10),
+      tags: dcv("subject").join(", "),
+      desc: plain(dcv("description")[0])
+    };
+    ids.forEach(function (k) { $("f-" + k).value = initial[k]; });
+    $("fname").textContent = fileName; $("results").innerHTML = "";
+    $("fsize").textContent = (file.size / 1048576).toFixed(1).replace(".", ",") + " MB";
+    $("cover").style.backgroundImage = "";
+    var it = coverItem();
+    if (it) {
+      var f = zip.file(resolve(it.getAttribute("href")));
+      if (f) $("cover").style.backgroundImage = "url(data:" + it.getAttribute("media-type") + ";base64," + (await f.async("base64")) + ")";
+    }
+    $("drop").style.display = "none";
+    $("book").style.display = "block";
+    say("");
+  }
+
+  function setDC(n, vals) {
+    byNS(DC, n).forEach(function (e) { e.remove(); });
+    vals.forEach(function (v) { var e = doc.createElementNS(DC, "dc:" + n); e.textContent = v; meta.appendChild(e); });
+  }
+  function setMeta(n, v) {
+    metas().filter(function (x) { return x.getAttribute("name") === n; }).forEach(function (e) { e.remove(); });
+    if (v) { var e = doc.createElementNS(OPF, "meta"); e.setAttribute("name", n); e.setAttribute("content", v); meta.appendChild(e); }
+  }
+  function val(k) { return $("f-" + k).value.trim(); }
+  function changed(k) { return val(k) !== initial[k]; }
+  function split(s, sep) { return s.split(sep).map(function (x) { return x.trim(); }).filter(Boolean); }
+
+  async function save() {
+    try {
+      if (changed("title")) setDC("title", val("title") ? [val("title")] : []);
+      if (changed("authors")) setDC("creator", split(val("authors"), ";"));
+      if (changed("publisher")) setDC("publisher", val("publisher") ? [val("publisher")] : []);
+      if (changed("lang")) setDC("language", val("lang") ? [val("lang")] : []);
+      if (changed("date")) setDC("date", val("date") ? [val("date")] : []);
+      if (changed("tags")) setDC("subject", split(val("tags"), ","));
+      if (changed("desc")) setDC("description", val("desc") ? [val("desc")] : []);
+      if (changed("series")) setMeta("calibre:series", val("series"));
+      if (changed("index") || changed("series")) setMeta("calibre:series_index", val("series") ? val("index") : "");
+
+      if (newCover) {
+        var mt = newCover.type, ext = mt === "image/png" ? "png" : "jpg";
+        var buf = await newCover.arrayBuffer(), it = coverItem();
+        if (it) {
+          zip.file(resolve(it.getAttribute("href")), buf);
+          it.setAttribute("media-type", mt);
+        } else {
+          var man = doc.getElementsByTagNameNS(OPF, "manifest")[0];
+          var ni = doc.createElementNS(OPF, "item");
+          ni.setAttribute("id", "cover-image");
+          ni.setAttribute("href", "cover-new." + ext);
+          ni.setAttribute("media-type", mt);
+          man.appendChild(ni);
+          zip.file(dirOf(opfPath) + "cover-new." + ext, buf);
+          setMeta("cover", "cover-image");
+        }
+      }
+
+      zip.file(opfPath, new XMLSerializer().serializeToString(doc));
+      zip.file("mimetype", "application/epub+zip", { compression: "STORE" });
+      var blob = await zip.generateAsync({ type: "blob", mimeType: "application/epub+zip", compression: "DEFLATE" });
+
+      var name = fileName;
+      if ($("rename").checked) {
+        var a = split(val("authors"), ";")[0] || "", t = val("title");
+        if (t) name = ((a ? a + " - " : "") + t).replace(/[\\\/:*?"<>|]+/g, "").slice(0, 150) + ".epub";
+      }
+      var dl = (window.claude && window.claude.use) ? await window.claude.use("downloads") : null;
+      if (dl) {
+        await dl.save({ filename: name, data: blob });
+      } else {
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob); link.download = name;
+        document.body.appendChild(link); link.click(); link.remove();
+      }
+      say("File salvato: " + name);
+    } catch (e) {
+      if (e && e.code === "declined") { say("Salvataggio annullato."); return; }
+      say("Non sono riuscito a salvare il file. Riprova.", true);
+    }
+  }
+
+  $("drop").addEventListener("dragover", function (e) { e.preventDefault(); $("drop").classList.add("over"); });
+  $("drop").addEventListener("dragleave", function () { $("drop").classList.remove("over"); });
+  $("drop").addEventListener("drop", function (e) { e.preventDefault(); $("drop").classList.remove("over"); if (e.dataTransfer.files[0]) openFile(e.dataTransfer.files[0]); });
+  $("file").addEventListener("change", function () { if (this.files[0]) openFile(this.files[0]); this.value = ""; });
+  $("coverfile").addEventListener("change", function () {
+    var f = this.files[0]; this.value = "";
+    if (!f) return;
+    if (f.type !== "image/jpeg" && f.type !== "image/png") { say("Usa un'immagine JPG o PNG.", true); return; }
+    newCover = f;
+    var r = new FileReader();
+    r.onload = function () { $("cover").style.backgroundImage = "url(" + r.result + ")"; };
+    r.readAsDataURL(f);
+    say("Nuova copertina pronta: verrà applicata al salvataggio.");
+  });
+  function imgUrl(u) { return (u || "").replace(/^http:/, "https:"); }
+
+  async function search() {
+    var t = val("title"), a = split(val("authors"), ";")[0] || "", box = $("results");
+    if (!t) { say("Scrivi almeno il titolo per cercare.", true); return; }
+    say("Cerco online…"); box.innerHTML = "";
+    try {
+      var q = "intitle:" + t + (a ? " inauthor:" + a : "");
+      var r = await fetch("https://www.googleapis.com/books/v1/volumes?maxResults=6&printType=books&q=" + encodeURIComponent(q));
+      if (!r.ok) throw new Error(r.status);
+      var list = (await r.json()).items || [];
+      if (!list.length) { say("Nessun risultato. Prova a correggere titolo o autore."); return; }
+      say("Tocca un risultato per applicarlo ai campi.");
+      list.forEach(function (it) {
+        var v = it.volumeInfo || {}, b = document.createElement("button");
+        b.type = "button"; b.className = "hit";
+        var img = document.createElement("img"); img.alt = "";
+        if (v.imageLinks && v.imageLinks.thumbnail) img.src = imgUrl(v.imageLinks.thumbnail);
+        var txt = document.createElement("span"), h = document.createElement("strong"), sm = document.createElement("small");
+        h.textContent = v.title || "(senza titolo)";
+        sm.textContent = [(v.authors || []).join(", "), v.publisher, (v.publishedDate || "").slice(0, 4)].filter(Boolean).join(" – ");
+        txt.appendChild(h); txt.appendChild(sm); b.appendChild(img); b.appendChild(txt);
+        b.addEventListener("click", function () { applyHit(v); });
+        box.appendChild(b);
+      });
+    } catch (e) { say("Ricerca non riuscita. Controlla la connessione e riprova.", true); }
+  }
+
+  async function applyHit(v) {
+    function put(k, x) { if (x) $("f-" + k).value = x; }
+    put("title", v.title); put("authors", (v.authors || []).join("; "));
+    put("publisher", v.publisher); put("lang", v.language); put("date", v.publishedDate);
+    put("tags", (v.categories || []).join(", ")); put("desc", plain(v.description));
+    $("results").innerHTML = "";
+    var link = v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail);
+    if (!link) { say("Dati applicati. Controlla i campi e salva."); return; }
+    try {
+      var rr = await fetch(imgUrl(link).replace("zoom=1", "zoom=2"));
+      var bl = await rr.blob();
+      if (bl.type !== "image/jpeg" && bl.type !== "image/png") throw new Error("tipo");
+      newCover = bl;
+      var fr = new FileReader();
+      fr.onload = function () { $("cover").style.backgroundImage = "url(" + fr.result + ")"; };
+      fr.readAsDataURL(bl);
+      say("Dati e copertina applicati. Controlla i campi e salva.");
+    } catch (e) {
+      say("Dati applicati. La copertina non si è potuta scaricare: puoi sceglierla con “Cambia copertina”.");
+    }
+  }
+
+  $("search").addEventListener("click", search);
+  $("save").addEventListener("click", save);
+  $("another").addEventListener("click", function () {
+    $("book").style.display = "none"; $("drop").style.display = ""; zip = doc = meta = null; say("");
+  });
+})();
+</script>
+<script>if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) { navigator.serviceWorker.register("sw.js").catch(function () {}); }</script>
+</body>
+</html>

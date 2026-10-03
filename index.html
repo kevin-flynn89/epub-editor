@@ -33,7 +33,7 @@ h1{font:700 1.7rem/1.2 Literata,Georgia,serif;margin:0 0 4px}
 .fname{font-weight:600;overflow-wrap:anywhere}
 .small{color:var(--mute);font-size:.88rem}
 label{display:block;font-weight:600;font-size:.92rem;margin:14px 0 4px}
-input[type=text],input[type=number],textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+input[type=text],input[type=number],select,textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
 textarea{min-height:130px;resize:vertical}
 input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .row{display:grid;grid-template-columns:1fr 100px;gap:12px}
@@ -51,6 +51,19 @@ input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px soli
 .vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
 label.drop{margin:0;font-weight:400}
 label.btn{display:inline-block;margin:0;text-align:center}
+.opt{margin-top:16px;border:1px solid var(--line);border-radius:8px;padding:0 12px 12px;background:var(--panel)}
+.opt summary{cursor:pointer;font-weight:600;padding:12px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.opt .check{margin-top:10px}
+.pvbox{position:sticky;top:0;z-index:2;background:var(--bg);padding:10px 0 4px}
+#pv{max-height:32vh;overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:6px;font:16px/1.4 Georgia,"Times New Roman",serif}
+#pv h1{font-size:1.3em;margin:.2em 0 .5em}
+#pv p{margin:0 0 .6em}
+.tocrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.tocrow input{flex:1 1 100%}
+.btn.sm{padding:6px 10px;min-width:38px;font-size:.95rem}
+#report ul{margin:4px 0 0;padding-left:18px}
+.bad{color:var(--err)}
 </style>
 </head>
 <body>
@@ -98,6 +111,47 @@ label.btn{display:inline-block;margin:0;text-align:center}
     <label for="f-desc">Descrizione</label>
     <textarea id="f-desc"></textarea>
 
+    <div class="optwrap">
+    <div class="pvbox"><div class="small">Anteprima del primo capitolo (si aggiorna mentre cambi le opzioni)</div><style id="pvstyle"></style><div id="pv"></div></div>
+    <details class="opt"><summary>Stile e impaginazione</summary>
+      <div class="small">Lascia vuoto per non cambiare nulla.</div>
+      <div class="grid2">
+        <div><label for="s-margin">Margini laterali (%)</label><input type="number" id="s-margin" step="any" min="0" max="20"></div>
+        <div><label for="s-line">Interlinea</label><input type="number" id="s-line" step="0.1" min="1" max="3" placeholder="es. 1.4"></div>
+        <div><label for="s-gap">Spazio tra paragrafi (em)</label><input type="number" id="s-gap" step="0.1" min="0" max="3"></div>
+        <div><label for="s-indent">Rientro prima riga (em)</label><input type="number" id="s-indent" step="0.1" min="0" max="5"></div>
+        <div><label for="s-size">Dimensione testo (%)</label><input type="number" id="s-size" min="50" max="250" placeholder="es. 100"></div>
+        <div><label for="s-align">Allineamento</label><select id="s-align"><option value="">Invariato</option><option value="left">A sinistra</option><option value="justify">Giustificato</option></select></div>
+        <div><label for="s-hyph">Sillabazione</label><select id="s-hyph"><option value="">Invariata</option><option value="auto">Attiva</option><option value="manual">Disattivata</option></select></div>
+        <div><label for="s-font">Carattere</label><select id="s-font"><option value="">Invariato</option><option value="serif">Con grazie (serif)</option><option value="sans">Senza grazie (sans)</option></select></div>
+      </div>
+    </details>
+    <details class="opt"><summary>Pulizia del testo</summary>
+      <label for="t-quotes">Virgolette</label>
+      <select id="t-quotes"><option value="">Invariate</option><option value="it">Caporali «…»</option><option value="en">Inglesi “…”</option></select>
+      <label class="check"><input type="checkbox" id="t-apos"> Apostrofi tipografici (l’amico)</label>
+      <label class="check"><input type="checkbox" id="t-dots"> Tre puntini diventano …</label>
+      <label class="check"><input type="checkbox" id="t-spaces"> Elimina gli spazi doppi</label>
+      <label class="check"><input type="checkbox" id="t-punct"> Elimina lo spazio prima della punteggiatura</label>
+      <label class="check"><input type="checkbox" id="t-dash"> Dialoghi con trattino lungo (—)</label>
+    </details>
+
+    </div>
+    <details class="opt"><summary>Pulizia dello stile del libro</summary>
+      <div class="small">Toglie ciò che l'editore ha imposto, così il tuo lettore usa le sue impostazioni.</div>
+      <label class="check"><input type="checkbox" id="c-color"> Togli i colori (testo e sfondo)</label>
+      <label class="check"><input type="checkbox" id="c-font"> Togli caratteri e dimensioni imposti</label>
+      <label class="check"><input type="checkbox" id="c-all"> Togli tutti i fogli di stile e gli stili nel testo</label>
+    </details>
+    <details class="opt"><summary>Indice del libro</summary>
+      <div class="small">Rinomina, sposta o elimina le voci. Il rientro mostra il livello.</div>
+      <div id="toc"></div>
+      <div class="actions"><button class="btn ghost" id="toc-gen" type="button">Rigenera dai capitoli</button></div>
+    </details>
+    <details class="opt"><summary>Controllo del libro</summary>
+      <div class="actions" style="margin-top:0;padding-top:10px"><button class="btn ghost" id="check" type="button">Controlla il libro</button></div>
+      <div id="report" class="small" style="margin-top:10px"></div>
+    </details>
     <label class="check"><input type="checkbox" id="rename" checked> Rinomina il file come “Autore - Titolo”</label>
 
     <div class="actions">
@@ -173,6 +227,9 @@ label.btn{display:inline-block;margin:0;text-align:center}
     }
     $("drop").style.display = "none";
     $("book").style.display = "block";
+    renderPreview();
+    $("report").textContent = "";
+    loadToc().then(renderToc);
     say("");
   }
 
@@ -218,6 +275,8 @@ label.btn{display:inline-block;margin:0;text-align:center}
         }
       }
 
+      await writeToc();
+      await applyBook();
       zip.file(opfPath, new XMLSerializer().serializeToString(doc));
       zip.file("mimetype", "application/epub+zip", { compression: "STORE" });
       var blob = await zip.generateAsync({ type: "blob", mimeType: "application/epub+zip", compression: "DEFLATE" });
@@ -235,7 +294,7 @@ label.btn{display:inline-block;margin:0;text-align:center}
         link.href = URL.createObjectURL(blob); link.download = name;
         document.body.appendChild(link); link.click(); link.remove();
       }
-      say("File salvato: " + name);
+      say("File salvato: " + name + (bookNote || ""));
     } catch (e) {
       if (e && e.code === "declined") { say("Salvataggio annullato."); return; }
       say("Non sono riuscito a salvare il file. Riprova.", true);
@@ -333,6 +392,346 @@ label.btn{display:inline-block;margin:0;text-align:center}
     }
   }
 
+  var bookNote = "";
+  function num(id) { var v = parseFloat($(id).value); return isNaN(v) ? "" : v; }
+
+  function readOpts() {
+    var o = { css: [], quotes: $("t-quotes").value, apos: $("t-apos").checked, dots: $("t-dots").checked,
+      spaces: $("t-spaces").checked, punct: $("t-punct").checked, dash: $("t-dash").checked };
+    function rule(sel, props) { o.css.push(sel + "{" + props + "}"); }
+    var m = num("s-margin"), l = num("s-line"), g = num("s-gap"), i = num("s-indent"), z = num("s-size");
+    if (m !== "") rule("body", "margin-left:" + m + "% !important;margin-right:" + m + "% !important");
+    if (l !== "") rule("body,p,li", "line-height:" + l + " !important");
+    if (g !== "") rule("p", "margin-top:0 !important;margin-bottom:" + g + "em !important");
+    if (i !== "") rule("p", "text-indent:" + i + "em !important");
+    if (z !== "") rule("body", "font-size:" + z + "% !important");
+    if ($("s-align").value) rule("p,li", "text-align:" + $("s-align").value + " !important");
+    if ($("s-hyph").value) rule("p", "hyphens:" + $("s-hyph").value + " !important;-webkit-hyphens:" + $("s-hyph").value + " !important");
+    if ($("s-font").value) rule("body,p,li", "font-family:" + ($("s-font").value === "serif" ? "Georgia,'Times New Roman',serif" : "'Helvetica Neue',Arial,sans-serif") + " !important");
+    return o;
+  }
+
+  function fixText(t, o, prev, first) {
+    if (o.dash && first) t = t.replace(/^(\s*)[-–]\s+/, "$1— ");
+    if (o.dots) t = t.replace(/\.{3,}/g, "…");
+    if (o.spaces) t = t.replace(/[ \t]{2,}/g, " ");
+    if (o.punct) t = t.replace(/(\S)[ \t]+([,;.!?…])/g, "$1$2");
+    if (o.apos) t = t.replace(/(\p{L})'(\p{L})/gu, "$1’$2");
+    if (o.quotes) {
+      var op = o.quotes === "it" ? "«" : "“", cl = o.quotes === "it" ? "»" : "”", out = "", p = prev;
+      for (var k = 0; k < t.length; k++) {
+        var c = t.charAt(k);
+        if (c === "“" || c === "«") c = op;
+        else if (c === "”" || c === "»") c = cl;
+        else if (c === '"') c = (!p || /[\s(\[—–-]/.test(p)) ? op : cl;
+        out += c; p = c;
+      }
+      t = out;
+    }
+    return t;
+  }
+
+  function fixDoc(d, o) {
+    var root = d.getElementsByTagName("body")[0];
+    if (!root) return;
+    var w = d.createTreeWalker(root, NodeFilter.SHOW_TEXT), n, lastBlock = null, prev = "";
+    while ((n = w.nextNode())) {
+      var par = n.parentNode;
+      if (par.closest && par.closest("script,style,pre,code")) continue;
+      var b = (par.closest && par.closest("p,div,li,h1,h2,h3,h4,h5,h6,blockquote,td,th,dd,dt")) || root;
+      var first = b !== lastBlock;
+      if (first) prev = "";
+      lastBlock = b;
+      var t = fixText(n.nodeValue, o, prev, first);
+      n.nodeValue = t;
+      if (t.length) prev = t.charAt(t.length - 1);
+    }
+  }
+
+  async function applyBook() {
+    bookNote = "";
+    var o = readOpts(), hasCss = o.css.length > 0;
+    var hasTxt = !!(o.quotes || o.apos || o.dots || o.spaces || o.punct || o.dash);
+    var fl = { color: $("c-color").checked, font: $("c-font").checked, all: $("c-all").checked }, hasFil = fl.color || fl.font || fl.all;
+    if (!hasCss && !hasTxt && !hasFil) return;
+    say("Elaboro i capitoli…");
+    var dir = dirOf(opfPath), cssName = "editor-style.css";
+    if (hasCss) {
+      zip.file(dir + cssName, o.css.join("\n"));
+      if (!items().some(function (i) { return i.getAttribute("href") === cssName; })) {
+        var man = doc.getElementsByTagNameNS(OPF, "manifest")[0], ni = doc.createElementNS(OPF, "item");
+        ni.setAttribute("id", "editor-style"); ni.setAttribute("href", cssName); ni.setAttribute("media-type", "text/css");
+        man.appendChild(ni);
+      }
+    }
+    var done = 0, skipped = 0, dp = new DOMParser(), ser = new XMLSerializer();
+    if (hasFil && !fl.all) {
+      var cssItems = items().filter(function (i) { return i.getAttribute("media-type") === "text/css" && i.getAttribute("href") !== cssName; });
+      for (var q = 0; q < cssItems.length; q++) {
+        var cpath = resolve(cssItems[q].getAttribute("href")), cf = zip.file(cpath);
+        if (cf) zip.file(cpath, stripProps(await cf.async("string"), fl));
+      }
+    }
+    var chapters = items().filter(function (i) { return i.getAttribute("media-type") === "application/xhtml+xml"; });
+    for (var c = 0; c < chapters.length; c++) {
+      var href = chapters[c].getAttribute("href"), path = resolve(href), f = zip.file(path);
+      if (!f) continue;
+      var d = dp.parseFromString(await f.async("string"), "application/xml");
+      if (d.getElementsByTagName("parsererror").length) { skipped++; continue; }
+      if (hasFil) filterDoc(d, fl, cssName);
+      if (hasTxt) fixDoc(d, o);
+      if (hasCss) {
+        var head = d.getElementsByTagName("head")[0];
+        var has = head && Array.prototype.some.call(head.getElementsByTagName("link"), function (l) { return (l.getAttribute("href") || "").slice(-cssName.length) === cssName; });
+        if (head && !has) {
+          var rel = new Array(href.split("/").length).join("../") + cssName, lk = d.createElementNS(head.namespaceURI, "link");
+          lk.setAttribute("rel", "stylesheet"); lk.setAttribute("type", "text/css"); lk.setAttribute("href", rel);
+          head.appendChild(lk);
+        }
+      }
+      zip.file(path, ser.serializeToString(d)); done++;
+    }
+    bookNote = " – " + done + " capitoli aggiornati" + (skipped ? ", " + skipped + " saltati" : "");
+  }
+
+  async function renderPreview() {
+    if (!zip) return;
+    var o = readOpts(), pv = $("pv");
+    var ch = items().filter(function (i) { return i.getAttribute("media-type") === "application/xhtml+xml"; })[0];
+    var f = ch && zip.file(resolve(ch.getAttribute("href")));
+    if (!f) { pv.textContent = "Nessun capitolo da mostrare."; return; }
+    var d = new DOMParser().parseFromString(await f.async("string"), "application/xml");
+    if (d.getElementsByTagName("parsererror").length) { pv.textContent = "Capitolo non leggibile."; return; }
+    if (o.quotes || o.apos || o.dots || o.spaces || o.punct || o.dash) fixDoc(d, o);
+    $("pvstyle").textContent = o.css.map(function (r) {
+      var k = r.indexOf("{");
+      return r.slice(0, k).split(",").map(function (x) { return x === "body" ? "#pv" : "#pv " + x; }).join(",") + r.slice(k);
+    }).join("\n");
+    pv.innerHTML = "";
+    var body = d.getElementsByTagName("body")[0];
+    Array.prototype.forEach.call(body.childNodes, function (n) { pv.appendChild(document.importNode(n, true)); });
+    Array.prototype.forEach.call(pv.querySelectorAll("script,style,link,img"), function (n) { n.remove(); });
+  }
+
+  function stripProps(css, fl) {
+    var pr = [];
+    if (fl.color) pr.push("color", "background[\\w-]*");
+    if (fl.font) pr.push("font-family", "font-size");
+    if (!pr.length) return css;
+    return css.replace(new RegExp("(^|[;{\\s])(?:" + pr.join("|") + ")\\s*:[^;}]*;?", "gi"), "$1");
+  }
+
+  function filterDoc(d, fl, cssName) {
+    Array.prototype.slice.call(d.getElementsByTagName("*")).forEach(function (e) {
+      var n = e.localName;
+      if (n === "link") {
+        if (fl.all && /stylesheet/i.test(e.getAttribute("rel") || "") && (e.getAttribute("href") || "").slice(-cssName.length) !== cssName) e.remove();
+      } else if (n === "style") {
+        if (fl.all) e.remove(); else e.textContent = stripProps(e.textContent, fl);
+      } else if (e.hasAttribute("style")) {
+        if (fl.all) { e.removeAttribute("style"); return; }
+        var v = stripProps(e.getAttribute("style"), fl);
+        if (v.trim()) e.setAttribute("style", v); else e.removeAttribute("style");
+      }
+    });
+  }
+
+  function esc(t) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function absPath(src, from) {
+    var u = new URL(src, "http://x/" + dirOf(from)), pth = u.pathname.slice(1);
+    try { pth = decodeURIComponent(pth); } catch (e) {}
+    return { path: pth, hash: u.hash };
+  }
+  function relPath(fromDir, to) {
+    var a = fromDir.split("/").filter(Boolean), b = to.split("/"), i = 0;
+    while (i < a.length && i < b.length - 1 && a[i] === b[i]) i++;
+    return new Array(a.length - i + 1).join("../") + b.slice(i).join("/");
+  }
+
+  var toc = [], tocSrc = {}, tocDirty = false;
+  function navOf(d) {
+    var navs = Array.prototype.slice.call(d.getElementsByTagName("nav"));
+    return navs.filter(function (x) { return /toc/.test(x.getAttribute("epub:type") || ""); })[0] || navs[0];
+  }
+  function kids(el, name) { return Array.prototype.filter.call(el.children, function (c) { return c.localName === name; }); }
+
+  async function loadToc() {
+    toc = []; tocSrc = {}; tocDirty = false;
+    try {
+      var its = items(), dp = new DOMParser();
+      var nav = its.filter(function (i) { return (i.getAttribute("properties") || "").split(/\s+/).indexOf("nav") >= 0; })[0];
+      var ncx = its.filter(function (i) { return i.getAttribute("media-type") === "application/x-dtbncx+xml"; })[0];
+      if (nav && zip.file(resolve(nav.getAttribute("href")))) tocSrc.nav = resolve(nav.getAttribute("href"));
+      if (ncx && zip.file(resolve(ncx.getAttribute("href")))) tocSrc.ncx = resolve(ncx.getAttribute("href"));
+      if (tocSrc.nav) {
+        var nd = dp.parseFromString(await zip.file(tocSrc.nav).async("string"), "application/xml"), tn = navOf(nd);
+        var ol = tn && tn.getElementsByTagName("ol")[0];
+        (function walk(list, depth) {
+          kids(list, "li").forEach(function (li) {
+            var lab = Array.prototype.filter.call(li.children, function (c) { return c.localName === "a" || c.localName === "span"; })[0];
+            if (lab) {
+              var ap = absPath(lab.getAttribute("href") || "", tocSrc.nav);
+              toc.push({ label: lab.textContent.trim().replace(/\s+/g, " "), path: lab.getAttribute("href") ? ap.path : "", hash: ap.hash, depth: depth });
+            }
+            kids(li, "ol").forEach(function (o2) { walk(o2, depth + 1); });
+          });
+        })(ol || nd.documentElement, 0);
+      } else if (tocSrc.ncx) {
+        var xd = dp.parseFromString(await zip.file(tocSrc.ncx).async("string"), "application/xml");
+        (function walk2(parent, depth) {
+          kids(parent, "navPoint").forEach(function (np) {
+            var t = np.getElementsByTagName("text")[0], c = kids(np, "content")[0];
+            var ap = absPath(c ? c.getAttribute("src") || "" : "", tocSrc.ncx);
+            toc.push({ label: t ? t.textContent.trim() : "", path: ap.path, hash: ap.hash, depth: depth });
+            walk2(np, depth + 1);
+          });
+        })(xd.getElementsByTagName("navMap")[0] || xd.documentElement, 0);
+      }
+    } catch (e) { toc = []; }
+  }
+
+  function renderToc() {
+    var box = $("toc"); box.innerHTML = "";
+    if (!toc.length) { box.textContent = "Nessuna voce di indice trovata."; return; }
+    toc.forEach(function (e, i) {
+      var row = document.createElement("div"); row.className = "tocrow"; row.style.paddingLeft = Math.min(e.depth, 4) * 14 + "px";
+      var inp = document.createElement("input"); inp.type = "text"; inp.value = e.label;
+      inp.addEventListener("input", function () { e.label = inp.value; tocDirty = true; });
+      row.appendChild(inp);
+      [["↑", -1, "Sposta su"], ["↓", 1, "Sposta giù"], ["←", "l", "Livello precedente"], ["→", "r", "Livello successivo"], ["✕", "x", "Elimina"]].forEach(function (b) {
+        var bt = document.createElement("button"); bt.type = "button"; bt.className = "btn ghost sm"; bt.textContent = b[0]; bt.title = b[2]; bt.setAttribute("aria-label", b[2]);
+        bt.addEventListener("click", function () {
+          var k = b[1];
+          if (k === "x") toc.splice(i, 1);
+          else if (k === "l") e.depth = Math.max(0, e.depth - 1);
+          else if (k === "r") e.depth += 1;
+          else { var j = i + k; if (j < 0 || j >= toc.length) return; toc[i] = toc[j]; toc[j] = e; }
+          tocDirty = true; renderToc();
+        });
+        row.appendChild(bt);
+      });
+      box.appendChild(row);
+    });
+  }
+
+  async function genToc() {
+    if (!tocSrc.nav && !tocSrc.ncx) { say("Il libro non ha un file di indice da aggiornare.", true); return; }
+    var spine = Array.prototype.slice.call(doc.getElementsByTagNameNS(OPF, "itemref")), out = [], its = items();
+    for (var k = 0; k < spine.length; k++) {
+      var it = its.filter(function (x) { return x.getAttribute("id") === spine[k].getAttribute("idref"); })[0];
+      if (!it || it.getAttribute("media-type") !== "application/xhtml+xml") continue;
+      var path = resolve(it.getAttribute("href")), f = zip.file(path);
+      if (!f || path === tocSrc.nav) continue;
+      var d = new DOMParser().parseFromString(await f.async("string"), "application/xml");
+      if (d.getElementsByTagName("parsererror").length) continue;
+      var h = d.querySelector("h1,h2,h3"), t = d.getElementsByTagName("title")[0];
+      out.push({ label: ((h && h.textContent) || (t && t.textContent) || "Capitolo " + (out.length + 1)).trim().replace(/\s+/g, " "), path: path, hash: "", depth: 0 });
+    }
+    toc = out; tocDirty = true; renderToc();
+  }
+
+  function tocTree() {
+    var root = { kids: [] }, stack = [root], prev = -1;
+    toc.forEach(function (e) {
+      var d = Math.min(e.depth, prev + 1), node = { e: e, kids: [] };
+      prev = d; stack.length = d + 1; stack[d].kids.push(node); stack.push(node);
+    });
+    return root.kids;
+  }
+
+  async function writeToc() {
+    if (!tocDirty || !toc.length) return;
+    var dp = new DOMParser(), ser = new XMLSerializer(), tree = tocTree();
+    function href(e, from) { return encodeURI(relPath(dirOf(from), e.path)) + (e.hash || ""); }
+    if (tocSrc.ncx) {
+      var n = 0;
+      var pts = function (list) {
+        return list.map(function (x) {
+          n++;
+          return '<navPoint id="np' + n + '" playOrder="' + n + '"><navLabel><text>' + esc(x.e.label) + '</text></navLabel><content src="' + esc(href(x.e, tocSrc.ncx)) + '"/>' + pts(x.kids) + '</navPoint>';
+        }).join("");
+      };
+      var xd = dp.parseFromString(await zip.file(tocSrc.ncx).async("string"), "application/xml"), nm = xd.getElementsByTagName("navMap")[0];
+      if (nm) {
+        var fr = dp.parseFromString('<r xmlns="http://www.daisy.org/z3986/2005/ncx/">' + pts(tree) + "</r>", "application/xml").documentElement;
+        while (nm.firstChild) nm.removeChild(nm.firstChild);
+        Array.prototype.forEach.call(fr.childNodes, function (c) { nm.appendChild(xd.importNode(c, true)); });
+        zip.file(tocSrc.ncx, ser.serializeToString(xd));
+      }
+    }
+    if (tocSrc.nav) {
+      var nd = dp.parseFromString(await zip.file(tocSrc.nav).async("string"), "application/xml"), tn = navOf(nd);
+      var old = tn && tn.getElementsByTagName("ol")[0];
+      if (old) {
+        var lis = function (list) {
+          return list.map(function (x) {
+            return '<li><a href="' + esc(href(x.e, tocSrc.nav)) + '">' + esc(x.e.label) + "</a>" + (x.kids.length ? "<ol>" + lis(x.kids) + "</ol>" : "") + "</li>";
+          }).join("");
+        };
+        var nol = dp.parseFromString('<ol xmlns="http://www.w3.org/1999/xhtml">' + lis(tree) + "</ol>", "application/xml").documentElement;
+        old.parentNode.replaceChild(nd.importNode(nol, true), old);
+        zip.file(tocSrc.nav, ser.serializeToString(nd));
+      }
+    }
+    tocDirty = false;
+  }
+
+  async function checkBook() {
+    var rp = $("report"), bad = [], warn = [], dp = new DOMParser(), its = items(), seen = {};
+    rp.textContent = "Controllo in corso…";
+    try {
+      var mt = zip.file("mimetype");
+      if (!mt) bad.push("Manca il file mimetype.");
+      else if ((await mt.async("string")).trim() !== "application/epub+zip") bad.push("Il file mimetype ha un contenuto errato.");
+      var listed = {}, ids = {};
+      its.forEach(function (i) {
+        var pth = resolve(i.getAttribute("href")); listed[pth] = 1; ids[i.getAttribute("id")] = 1;
+        if (!zip.file(pth)) bad.push("File dichiarato ma mancante: " + pth);
+      });
+      Object.keys(zip.files).forEach(function (pth) {
+        if (zip.files[pth].dir || pth === "mimetype" || pth === opfPath || pth.indexOf("META-INF/") === 0 || listed[pth]) return;
+        warn.push("File non dichiarato nel libro: " + pth);
+      });
+      Array.prototype.forEach.call(doc.getElementsByTagNameNS(OPF, "itemref"), function (r) {
+        if (!ids[r.getAttribute("idref")]) bad.push("La sequenza di lettura cita un elemento inesistente: " + r.getAttribute("idref"));
+      });
+      var chapters = its.filter(function (i) { return i.getAttribute("media-type") === "application/xhtml+xml"; });
+      for (var c = 0; c < chapters.length; c++) {
+        var cp = resolve(chapters[c].getAttribute("href")), f = zip.file(cp);
+        if (!f) continue;
+        var d = dp.parseFromString(await f.async("string"), "application/xml");
+        if (d.getElementsByTagName("parsererror").length) { bad.push("Codice non valido (XML) in " + cp); continue; }
+        Array.prototype.forEach.call(d.querySelectorAll("img[src],link[href],a[href]"), function (e) {
+          var u = e.getAttribute("src") || e.getAttribute("href") || "";
+          if (!u || u.charAt(0) === "#" || /^[a-z][a-z0-9+.-]*:/i.test(u) || seen[cp + u]) return;
+          seen[cp + u] = 1;
+          if (!zip.file(absPath(u, cp).path)) bad.push("Collegamento rotto in " + cp + ": " + u);
+        });
+      }
+      if (!dcv("title")[0]) warn.push("Manca il titolo.");
+      if (!dcv("creator")[0]) warn.push("Manca l'autore.");
+      if (!dcv("language")[0]) warn.push("Manca la lingua.");
+      if (!coverItem()) warn.push("Manca la copertina.");
+      if (!tocSrc.nav && !tocSrc.ncx) warn.push("Manca il file dell'indice.");
+    } catch (e) { rp.textContent = "Non sono riuscito a completare il controllo."; return; }
+    function show(title, list, cls) {
+      if (!list.length) return;
+      var h = document.createElement("div"); h.style.fontWeight = "600"; h.style.marginTop = "8px"; h.className = cls; h.textContent = title + " (" + list.length + ")";
+      var ul = document.createElement("ul");
+      list.slice(0, 30).forEach(function (t) { var li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+      if (list.length > 30) { var m = document.createElement("li"); m.textContent = "…e altri " + (list.length - 30); ul.appendChild(m); }
+      rp.appendChild(h); rp.appendChild(ul);
+    }
+    rp.innerHTML = "";
+    if (!bad.length && !warn.length) { rp.textContent = "✓ Nessun problema trovato."; return; }
+    show("Problemi", bad, "bad"); show("Avvisi", warn, "");
+  }
+
+  $("check").addEventListener("click", checkBook);
+  $("toc-gen").addEventListener("click", genToc);
+  var ow = document.querySelector(".optwrap");
+  ow.addEventListener("input", renderPreview);
+  ow.addEventListener("change", renderPreview);
   $("search").addEventListener("click", search);
   $("save").addEventListener("click", save);
   $("another").addEventListener("click", function () {

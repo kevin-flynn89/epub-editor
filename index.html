@@ -112,7 +112,7 @@ label.btn{display:inline-block;margin:0;text-align:center}
     <textarea id="f-desc"></textarea>
 
     <div class="optwrap">
-    <div class="pvbox"><div class="small">Anteprima del primo capitolo (si aggiorna mentre cambi le opzioni)</div><style id="pvstyle"></style><div id="pv"></div></div>
+    <div class="pvbox"><div class="small">Anteprima del primo capitolo con testo (si aggiorna mentre cambi le opzioni)</div><style id="pvstyle"></style><div id="pv"></div></div>
     <details class="opt"><summary>Stile e impaginazione</summary>
       <div class="small">Lascia vuoto per non cambiare nulla.</div>
       <div class="grid2">
@@ -497,11 +497,21 @@ label.btn{display:inline-block;margin:0;text-align:center}
   async function renderPreview() {
     if (!zip) return;
     var o = readOpts(), pv = $("pv");
-    var ch = items().filter(function (i) { return i.getAttribute("media-type") === "application/xhtml+xml"; })[0];
-    var f = ch && zip.file(resolve(ch.getAttribute("href")));
-    if (!f) { pv.textContent = "Nessun capitolo da mostrare."; return; }
-    var d = new DOMParser().parseFromString(await f.async("string"), "application/xml");
-    if (d.getElementsByTagName("parsererror").length) { pv.textContent = "Capitolo non leggibile."; return; }
+    var d = null, byId = {}, order = [];
+    items().forEach(function (i) { byId[i.getAttribute("id")] = i; });
+    Array.prototype.forEach.call(doc.getElementsByTagNameNS(OPF, "itemref"), function (r) {
+      var it = byId[r.getAttribute("idref")];
+      if (it && it.getAttribute("media-type") === "application/xhtml+xml") order.push(it);
+    });
+    for (var k = 0; k < order.length && k < 8; k++) {
+      var f = zip.file(resolve(order[k].getAttribute("href")));
+      if (!f) continue;
+      var t = new DOMParser().parseFromString(await f.async("string"), "application/xml");
+      if (t.getElementsByTagName("parsererror").length) continue;
+      if (!d) d = t;
+      if ((t.documentElement.textContent || "").replace(/\s+/g, " ").length >= 300) { d = t; break; }
+    }
+    if (!d) { pv.textContent = "Nessun capitolo da mostrare."; return; }
     if (o.quotes || o.apos || o.dots || o.spaces || o.punct || o.dash) fixDoc(d, o);
     $("pvstyle").textContent = o.css.map(function (r) {
       var k = r.indexOf("{");
@@ -510,7 +520,7 @@ label.btn{display:inline-block;margin:0;text-align:center}
     pv.innerHTML = "";
     var body = d.getElementsByTagName("body")[0];
     Array.prototype.forEach.call(body.childNodes, function (n) { pv.appendChild(document.importNode(n, true)); });
-    Array.prototype.forEach.call(pv.querySelectorAll("script,style,link,img"), function (n) { n.remove(); });
+    Array.prototype.forEach.call(pv.querySelectorAll("script,style,link,img,svg,image,picture,video,audio,canvas,object,iframe,embed"), function (n) { n.remove(); });
   }
 
   function stripProps(css, fl) {

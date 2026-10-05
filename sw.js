@@ -1,4 +1,4 @@
-var C = "epub-editor-v6";
+var C = "epub-editor-v7";
 var SHELL = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png",
   "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"];
 self.addEventListener("install", function (e) {

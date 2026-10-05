@@ -124,6 +124,8 @@ label.btn{display:inline-block;margin:0;text-align:center}
         <div><label for="s-align">Allineamento</label><select id="s-align"><option value="">Invariato</option><option value="left">A sinistra</option><option value="justify">Giustificato</option></select></div>
         <div><label for="s-hyph">Sillabazione</label><select id="s-hyph"><option value="">Invariata</option><option value="auto">Attiva</option><option value="manual">Disattivata</option></select></div>
         <div><label for="s-font">Carattere</label><select id="s-font"><option value="">Invariato</option><option value="serif">Con grazie (serif)</option><option value="sans">Senza grazie (sans)</option></select></div>
+        <div><label for="s-drop">Capolettera</label><select id="s-drop"><option value="">Nessuno</option><option value="1">Dopo i titoli</option></select></div>
+        <div><label for="s-heads">Titoli</label><select id="s-heads"><option value="">Invariati</option><option value="center">Centrati</option><option value="left">A sinistra</option></select></div>
       </div>
     </details>
     <details class="opt"><summary>Pulizia del testo</summary>
@@ -136,7 +138,26 @@ label.btn{display:inline-block;margin:0;text-align:center}
       <label class="check"><input type="checkbox" id="t-dash"> Dialoghi con trattino lungo (—)</label>
     </details>
 
+    <details class="opt"><summary>Cerca, sostituisci ed elimina</summary>
+      <label for="r-del">Elimina questi testi <span class="small">(uno per riga)</span></label>
+      <textarea id="r-del" style="min-height:70px"></textarea>
+      <label for="r-rep">Sostituisci <span class="small">(una regola per riga: cerca =&gt; sostituisci)</span></label>
+      <textarea id="r-rep" style="min-height:70px"></textarea>
+      <label class="check"><input type="checkbox" id="r-case"> Distingui maiuscole e minuscole</label>
+      <label class="check"><input type="checkbox" id="r-rx"> Usa espressioni regolari (avanzato)</label>
+      <div class="actions"><button class="btn ghost" id="r-count" type="button">Conta le occorrenze</button></div>
+      <div class="small" id="r-out" style="margin-top:8px"></div>
+    </details>
     </div>
+    <details class="opt"><summary>Preset di stile</summary>
+      <div class="small">Salva le impostazioni di stile, pulizia e ricerca per riapplicarle ad altri libri.</div>
+      <label for="p-name">Nome del preset</label>
+      <input type="text" id="p-name" placeholder="es. Romanzi">
+      <div class="actions" style="margin-top:10px"><button class="btn ghost" id="p-save" type="button">Salva preset</button></div>
+      <label for="p-sel">Preset salvati</label>
+      <select id="p-sel"></select>
+      <div class="actions" style="margin-top:10px"><button class="btn ghost" id="p-apply" type="button">Applica</button><button class="btn ghost" id="p-del" type="button">Elimina</button></div>
+    </details>
     <details class="opt"><summary>Pulizia dello stile del libro</summary>
       <div class="small">Toglie ciò che l'editore ha imposto, così il tuo lettore usa le sue impostazioni.</div>
       <label class="check"><input type="checkbox" id="c-color"> Togli i colori (testo e sfondo)</label>
@@ -152,7 +173,13 @@ label.btn{display:inline-block;margin:0;text-align:center}
       <div class="actions" style="margin-top:0;padding-top:10px"><button class="btn ghost" id="check" type="button">Controlla il libro</button></div>
       <div id="report" class="small" style="margin-top:10px"></div>
     </details>
-    <label class="check"><input type="checkbox" id="rename" checked> Rinomina il file come “Autore - Titolo”</label>
+    <details class="opt"><summary>Statistiche del libro</summary>
+      <div class="actions" style="margin-top:0;padding-top:10px"><button class="btn ghost" id="stats-btn" type="button">Calcola</button></div>
+      <div id="stats" class="small" style="margin-top:10px"></div>
+    </details>
+    <label class="check"><input type="checkbox" id="rename" checked> Rinomina il file con questo modello</label>
+    <input type="text" id="f-tpl" value="{autore} - {titolo}" aria-label="Modello del nome del file">
+    <div class="small">Puoi usare {autore} {titolo} {serie} {numero} {anno}</div>
 
     <div class="actions">
       <button class="btn" id="save" type="button">Salva EPUB</button>
@@ -228,7 +255,7 @@ label.btn{display:inline-block;margin:0;text-align:center}
     $("drop").style.display = "none";
     $("book").style.display = "block";
     renderPreview();
-    $("report").textContent = "";
+    $("report").textContent = ""; $("stats").textContent = ""; $("r-out").textContent = "";
     loadToc().then(renderToc);
     say("");
   }
@@ -283,8 +310,11 @@ label.btn{display:inline-block;margin:0;text-align:center}
 
       var name = fileName;
       if ($("rename").checked) {
-        var a = split(val("authors"), ";")[0] || "", t = val("title");
-        if (t) name = ((a ? a + " - " : "") + t).replace(/[\\\/:*?"<>|]+/g, "").slice(0, 150) + ".epub";
+        var idx = val("index");
+        var vals = { autore: split(val("authors"), ";")[0] || "", titolo: val("title"), serie: val("series"), numero: idx ? String(idx).padStart(2, "0") : "", anno: (val("date").match(/\d{4}/) || [""])[0] };
+        var nm = ($("f-tpl").value || "{autore} - {titolo}").replace(/\{(\w+)\}/g, function (m, k) { return vals[k] || ""; });
+        nm = nm.replace(/[\\\/:*?"<>|]+/g, "").replace(/(\s*-\s*){2,}/g, " - ").replace(/\s{2,}/g, " ").replace(/^[\s-]+|[\s-]+$/g, "");
+        if (nm) name = nm.slice(0, 150) + ".epub";
       }
       var dl = (window.claude && window.claude.use) ? await window.claude.use("downloads") : null;
       if (dl) {
@@ -408,10 +438,22 @@ label.btn{display:inline-block;margin:0;text-align:center}
     if ($("s-align").value) rule("p,li", "text-align:" + $("s-align").value + " !important");
     if ($("s-hyph").value) rule("p", "hyphens:" + $("s-hyph").value + " !important;-webkit-hyphens:" + $("s-hyph").value + " !important");
     if ($("s-font").value) rule("body,p,li", "font-family:" + ($("s-font").value === "serif" ? "Georgia,'Times New Roman',serif" : "'Helvetica Neue',Arial,sans-serif") + " !important");
+    if ($("s-drop").value) rule("h1+p::first-letter,h2+p::first-letter", "float:left;font-size:3em;line-height:.85;padding:.04em .08em 0 0;font-weight:bold");
+    if ($("s-heads").value) rule("h1,h2,h3", "text-align:" + $("s-heads").value + " !important");
+    o.rules = [];
+    function mk(pat, to) {
+      try {
+        var rx = $("r-rx").checked;
+        o.rules.push({ re: new RegExp(rx ? pat : pat.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $("r-case").checked ? "g" : "gi"), to: rx ? to : to.replace(/\$/g, "$$$$") });
+      } catch (e) {}
+    }
+    $("r-del").value.split("\n").forEach(function (l) { l = l.replace(/\r$/, ""); if (l.trim()) mk(l, ""); });
+    $("r-rep").value.split("\n").forEach(function (l) { var k = l.indexOf("=>"); if (k > 0 && l.slice(0, k).trim()) mk(l.slice(0, k).trim(), l.slice(k + 2).trim()); });
     return o;
   }
 
   function fixText(t, o, prev, first) {
+    o.rules.forEach(function (r) { t = t.replace(r.re, r.to); });
     if (o.dash && first) t = t.replace(/^(\s*)[-–]\s+/, "$1— ");
     if (o.dots) t = t.replace(/\.{3,}/g, "…");
     if (o.spaces) t = t.replace(/[ \t]{2,}/g, " ");
@@ -451,7 +493,7 @@ label.btn{display:inline-block;margin:0;text-align:center}
   async function applyBook() {
     bookNote = "";
     var o = readOpts(), hasCss = o.css.length > 0;
-    var hasTxt = !!(o.quotes || o.apos || o.dots || o.spaces || o.punct || o.dash);
+    var hasTxt = !!(o.quotes || o.apos || o.dots || o.spaces || o.punct || o.dash || o.rules.length);
     var fl = { color: $("c-color").checked, font: $("c-font").checked, all: $("c-all").checked }, hasFil = fl.color || fl.font || fl.all;
     if (!hasCss && !hasTxt && !hasFil) return;
     say("Elaboro i capitoli…");
@@ -512,7 +554,7 @@ label.btn{display:inline-block;margin:0;text-align:center}
       if ((t.documentElement.textContent || "").replace(/\s+/g, " ").length >= 300) { d = t; break; }
     }
     if (!d) { pv.textContent = "Nessun capitolo da mostrare."; return; }
-    if (o.quotes || o.apos || o.dots || o.spaces || o.punct || o.dash) fixDoc(d, o);
+    if (o.quotes || o.apos || o.dots || o.spaces || o.punct || o.dash || o.rules.length) fixDoc(d, o);
     $("pvstyle").textContent = o.css.map(function (r) {
       var k = r.indexOf("{");
       return r.slice(0, k).split(",").map(function (x) { return x === "body" ? "#pv" : "#pv " + x; }).join(",") + r.slice(k);
@@ -737,6 +779,70 @@ label.btn{display:inline-block;margin:0;text-align:center}
     show("Problemi", bad, "bad"); show("Avvisi", warn, "");
   }
 
+  function xhtmlItems() { return items().filter(function (i) { return i.getAttribute("media-type") === "application/xhtml+xml"; }); }
+
+  async function countRules() {
+    var o = readOpts(), out = $("r-out");
+    if (!o.rules.length) { out.textContent = "Scrivi almeno un testo da cercare."; return; }
+    out.textContent = "Conto…";
+    var total = 0, chs = xhtmlItems();
+    for (var i = 0; i < chs.length; i++) {
+      var f = zip.file(resolve(chs[i].getAttribute("href")));
+      if (!f) continue;
+      var d = new DOMParser().parseFromString(await f.async("string"), "application/xml");
+      if (d.getElementsByTagName("parsererror").length) continue;
+      var w = d.createTreeWalker(d.documentElement, NodeFilter.SHOW_TEXT), n;
+      while ((n = w.nextNode())) o.rules.forEach(function (r) { var m = n.nodeValue.match(r.re); if (m) total += m.length; });
+    }
+    out.textContent = total + " occorrenze trovate (in ogni capitolo, dentro lo stesso blocco di testo).";
+  }
+
+  async function stats() {
+    var out = $("stats"), words = 0, nch = 0, chs = xhtmlItems();
+    out.textContent = "Calcolo…";
+    for (var i = 0; i < chs.length; i++) {
+      var pth = resolve(chs[i].getAttribute("href")), f = zip.file(pth);
+      if (!f || pth === tocSrc.nav) continue;
+      var d = new DOMParser().parseFromString(await f.async("string"), "application/xml");
+      if (d.getElementsByTagName("parsererror").length) continue;
+      Array.prototype.slice.call(d.querySelectorAll("title,style,script")).forEach(function (e) { e.remove(); });
+      var w = ((d.documentElement.textContent || "").match(/\S+/g) || []).length;
+      if (w > 0) { words += w; nch++; }
+    }
+    var mins = Math.round(words / 230), h = Math.floor(mins / 60);
+    out.textContent = "Capitoli con testo: " + nch + " · Parole: " + words.toLocaleString("it-IT") + " · Lettura: circa " + (h ? h + " h " : "") + (mins % 60) + " min (a 230 parole al minuto)";
+  }
+
+  var PIDS = ["s-margin", "s-line", "s-gap", "s-indent", "s-size", "s-align", "s-hyph", "s-font", "s-drop", "s-heads", "t-quotes", "t-apos", "t-dots", "t-spaces", "t-punct", "t-dash", "c-color", "c-font", "c-all", "r-del", "r-rep", "r-case", "r-rx", "f-tpl", "rename"];
+  function presets() { try { return JSON.parse(localStorage.getItem("epubPresets") || "{}"); } catch (e) { return {}; } }
+  function savePresets(ps) { try { localStorage.setItem("epubPresets", JSON.stringify(ps)); return true; } catch (e) { return false; } }
+  function listPresets() {
+    var sel = $("p-sel"), ps = presets(), ks = Object.keys(ps);
+    sel.innerHTML = "";
+    if (!ks.length) ks = [""];
+    ks.forEach(function (k) { var op = document.createElement("option"); op.value = k; op.textContent = k || "Nessun preset salvato"; sel.appendChild(op); });
+  }
+  $("p-save").addEventListener("click", function () {
+    var nm = $("p-name").value.trim();
+    if (!nm) { say("Scrivi un nome per il preset.", true); return; }
+    var data = {}, ps = presets();
+    PIDS.forEach(function (id) { var el = $(id); data[id] = el.type === "checkbox" ? el.checked : el.value; });
+    ps[nm] = data;
+    if (savePresets(ps)) say("Preset salvato: " + nm); else say("Non riesco a salvare il preset in questo browser.", true);
+    listPresets(); $("p-sel").value = nm;
+  });
+  $("p-apply").addEventListener("click", function () {
+    var d = presets()[$("p-sel").value];
+    if (!d) { say("Scegli un preset salvato.", true); return; }
+    PIDS.forEach(function (id) { var el = $(id); if (id in d) { if (el.type === "checkbox") el.checked = d[id]; else el.value = d[id]; } });
+    renderPreview(); say("Preset applicato.");
+  });
+  $("p-del").addEventListener("click", function () {
+    var ps = presets(); delete ps[$("p-sel").value]; savePresets(ps); listPresets(); say("Preset eliminato.");
+  });
+  listPresets();
+  $("r-count").addEventListener("click", countRules);
+  $("stats-btn").addEventListener("click", stats);
   $("check").addEventListener("click", checkBook);
   $("toc-gen").addEventListener("click", genToc);
   var ow = document.querySelector(".optwrap");

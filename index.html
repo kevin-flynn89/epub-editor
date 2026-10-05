@@ -36,7 +36,7 @@ label{display:block;font-weight:600;font-size:.92rem;margin:14px 0 4px}
 input[type=text],input[type=number],select,textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
 textarea{min-height:130px;resize:vertical}
 input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-.row{display:grid;grid-template-columns:1fr 100px;gap:12px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:12px}
 .check{display:flex;gap:8px;align-items:center;font-weight:400;margin-top:18px}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
 .btn{font:600 1rem "Public Sans",system-ui,sans-serif;background:var(--acc);color:var(--acc-ink);border:1px solid var(--acc);border-radius:8px;padding:12px 18px;cursor:pointer}
@@ -52,8 +52,12 @@ input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px soli
 label.drop{margin:0;font-weight:400}
 label.btn{display:inline-block;margin:0;text-align:center}
 .opt{margin-top:16px;border:1px solid var(--line);border-radius:8px;padding:0 12px 12px;background:var(--panel)}
-.opt summary{cursor:pointer;font-weight:600;padding:12px 0}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.opt summary{cursor:pointer;font-weight:600;padding:12px 0;list-style:none;display:flex;align-items:center;gap:10px}
+.opt summary::-webkit-details-marker{display:none}
+.opt summary::before{content:"";flex:none;width:7px;height:7px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(-45deg);transition:transform .15s}
+.opt[open] summary::before{transform:rotate(45deg)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+.grid2>div,.row>div{min-width:0}
 .opt .check{margin-top:10px}
 .pvbox{position:sticky;top:0;z-index:2;background:var(--bg);padding:10px 0 4px}
 #pv{max-height:32vh;overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:6px;font:16px/1.4 Georgia,"Times New Roman",serif}
@@ -64,6 +68,9 @@ label.btn{display:inline-block;margin:0;text-align:center}
 .btn.sm{padding:6px 10px;min-width:38px;font-size:.95rem}
 #report ul{margin:4px 0 0;padding-left:18px}
 .bad{color:var(--err)}
+select{appearance:none;-webkit-appearance:none;padding-right:38px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%237a8896' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+input,select,textarea{max-width:100%}
+#pv{box-shadow:0 2px 8px rgba(0,0,0,.08)}
 </style>
 </head>
 <body>
@@ -123,7 +130,7 @@ label.btn{display:inline-block;margin:0;text-align:center}
         <div><label for="s-size">Dimensione testo (%)</label><input type="number" id="s-size" min="50" max="250" placeholder="es. 100"></div>
         <div><label for="s-align">Allineamento</label><select id="s-align"><option value="">Invariato</option><option value="left">A sinistra</option><option value="justify">Giustificato</option></select></div>
         <div><label for="s-hyph">Sillabazione</label><select id="s-hyph"><option value="">Invariata</option><option value="auto">Attiva</option><option value="manual">Disattivata</option></select></div>
-        <div><label for="s-font">Carattere</label><select id="s-font"><option value="">Invariato</option><option value="serif">Con grazie (serif)</option><option value="sans">Senza grazie (sans)</option></select></div>
+        <div><label for="s-font">Carattere</label><select id="s-font"><option value="">Invariato</option><option value="serif">Serif</option><option value="sans">Sans serif</option></select></div>
         <div><label for="s-drop">Capolettera</label><select id="s-drop"><option value="">Nessuno</option><option value="1">Dopo i titoli</option></select></div>
         <div><label for="s-heads">Titoli</label><select id="s-heads"><option value="">Invariati</option><option value="center">Centrati</option><option value="left">A sinistra</option></select></div>
       </div>

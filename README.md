@@ -1,79 +1,159 @@
-# Colophon
+<p align="center">
+  <img src="docs/icon.png" width="112" alt="Colophon">
+</p>
 
-**Colophon** è una web app (PWA) gratuita per modificare i **metadati**, la **copertina**, lo **stile** e l'**indice** dei file EPUB, direttamente dal browser. Pensata come alternativa leggera alle funzioni di modifica di Calibre, utilizzabile da Chromebook, Android e PC.
+<h1 align="center">Colophon</h1>
 
-**I tuoi libri non vengono mai caricati su nessun server**: i file sono letti, modificati e salvati sul tuo dispositivo.
+<p align="center">
+  <b>Editor EPUB gratuito, nel browser, che funziona anche offline.</b><br>
+  <b>A free EPUB editor that runs in your browser, even offline.</b>
+</p>
 
-
-## Screenshots
+<p align="center">
+  <a href="https://colophon-editor.pages.dev"><b>colophon-editor.pages.dev</b></a><br>
+  <a href="#italiano">Italiano</a> · <a href="#english">English</a>
+</p>
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/00-lingua.png" width="200" alt="Scelta della lingua"><br><sub>Scelta della lingua</sub></td>
-    <td align="center"><img src="docs/screenshots/02-metadati.png" width="200" alt="Metadati e copertina"><br><sub>Metadati e copertina</sub></td>
-    <td align="center"><img src="docs/screenshots/03-stile-anteprima.png" width="200" alt="Stile e anteprima"><br><sub>Stile e anteprima</sub></td>
-    <td align="center"><img src="docs/screenshots/04-cerca-elimina.png" width="200" alt="Cerca ed elimina"><br><sub>Cerca, sostituisci ed elimina</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/screenshots/05-ortografia.png" width="200" alt="Controllo ortografico"><br><sub>Controllo ortografico</sub></td>
-    <td align="center"><img src="docs/screenshots/06-indice.png" width="200" alt="Indice del libro"><br><sub>Indice del libro</sub></td>
-    <td align="center"><img src="docs/screenshots/07-controllo.png" width="200" alt="Controllo del libro"><br><sub>Controllo del libro</sub></td>
-    <td></td>
+    <td align="center"><img src="docs/screenshots/02-metadati.png" width="200" alt=""><br><sub>Metadati · Metadata</sub></td>
+    <td align="center"><img src="docs/screenshots/03-stile-anteprima.png" width="200" alt=""><br><sub>Stile · Style</sub></td>
+    <td align="center"><img src="docs/screenshots/05-ortografia.png" width="200" alt=""><br><sub>Ortografia · Spell check</sub></td>
+    <td align="center"><img src="docs/screenshots/06-indice.png" width="200" alt=""><br><sub>Indice · Contents</sub></td>
   </tr>
 </table>
 
-*Gli screenshot usano un libro di prova creato per l'occasione.*
+---
 
-## Cosa puoi fare
+## Italiano
+
+**Colophon** è una web app (PWA) per modificare i file **EPUB** direttamente dal browser: metadati, copertina, stile, indice e testo. È pensata come alternativa leggera alle funzioni di modifica di Calibre e funziona su Chromebook, Android, Windows, macOS e Linux. Si può installare come una normale app e, dopo la prima apertura, usare anche senza connessione.
+
+> **Privacy:** i tuoi libri non vengono mai caricati su nessun server. Ogni file viene letto, modificato e salvato sul tuo dispositivo. L'originale non viene mai toccato: il salvataggio crea un nuovo file.
+
+### Come funziona
+
+1. Apri un file EPUB (anche da Google Drive, tramite il selettore file del dispositivo).
+2. Modifica i campi e le opzioni che ti servono: le sezioni lasciate vuote non cambiano nulla.
+3. Salva: scarichi un nuovo EPUB con le modifiche.
+
+Un EPUB è un archivio ZIP di pagine XHTML, immagini e un file di descrizione (OPF). Colophon lo legge nel browser, applica le modifiche ai file interessati e lo ricompone rispettando le regole del formato.
+
+### Caratteristiche
 
 **Metadati e copertina**
-- Modifica titolo, autori, serie e numero, editore, lingua, data, tag e descrizione
-- Sostituisci la copertina (JPG o PNG)
-- **Cerca online** titolo, autore e copertina (Google Books, con Open Library come alternativa)
-- Rinomina il file con un modello, per esempio `{serie} {numero} - {titolo}` (disponibili `{autore}`, `{titolo}`, `{serie}`, `{numero}`, `{anno}`)
+- Titolo, autori, serie e numero, editore, lingua, data, tag e descrizione
+- Sostituzione della copertina (JPG o PNG)
+- **Ricerca online** di titolo, autore e copertina (Google Books, con Open Library come alternativa)
+- Rinomina del file con un modello, per esempio `{serie} {numero} - {titolo}`
 
-**Stile e impaginazione** *(con anteprima del primo capitolo che si aggiorna mentre cambi le opzioni)*
-- Margini laterali, interlinea, spazio tra paragrafi, rientro della prima riga, dimensione del testo
-- Allineamento (a sinistra o giustificato), sillabazione, carattere (Serif o Sans serif)
+**Stile e impaginazione**, con anteprima del primo capitolo che si aggiorna in tempo reale
+- Margini, interlinea, spazio tra paragrafi, rientro della prima riga, dimensione del testo
+- Allineamento, sillabazione, carattere (Serif o Sans serif)
 - Capolettera dopo i titoli, titoli centrati o a sinistra
+- **Preset di stile** da salvare e riapplicare ad altri libri
+- Pulizia dello stile imposto dall'editore (colori, caratteri, dimensioni) o di tutti gli stili
 
 **Pulizia del testo**
 - Virgolette caporali «…» o inglesi “…”, apostrofi tipografici
-- Tre puntini che diventano …, spazi doppi, spazio prima della punteggiatura
-- Dialoghi con il trattino lungo (—)
-- **Cerca, sostituisci ed elimina** in tutto il libro (anche con espressioni regolari), con conteggio delle occorrenze
+- Tre puntini in …, spazi doppi, spazio prima della punteggiatura, dialoghi con il trattino lungo
+- **Cerca, sostituisci ed elimina** in tutto il libro, anche con espressioni regolari, con conteggio delle occorrenze
+
+**Controllo ortografico**
+- Trova le parole non presenti nel dizionario, in **italiano o inglese** (per esempio errori di scansione come "vImperatore")
+- Mostra la frase in cui compaiono e propone una correzione; scegli tu quali applicare a tutto il libro
+- Funziona offline (motore Hunspell compilato in WebAssembly) e può ignorare i nomi propri
 
 **Struttura del libro**
-- **Controllo ortografico:** trova le parole non presenti nel dizionario, italiano o inglese (per esempio errori di scansione come "vImperatore"), mostra la frase in cui compaiono, propone una correzione e lascia scegliere a te quali applicare a tutto il libro. Funziona offline e può ignorare i nomi propri
-- **Pulizia dello stile del libro:** togli colori, caratteri e dimensioni imposti dall'editore, oppure tutti gli stili
 - **Indice:** rinomina, sposta, cambia livello o elimina le voci; rigenera l'indice dai capitoli
 - **Controllo del libro:** segnala file mancanti o non dichiarati, collegamenti e immagini rotti, codice non valido, dati mancanti
 - **Statistiche:** capitoli, parole e tempo di lettura stimato
 
-**Comodità**
-- **Italiano e inglese:** al primo avvio l'app propone la lingua rilevata dal dispositivo (italiano o inglese, altrimenti inglese) e chiede di confermarla; si può cambiare in qualsiasi momento con i pulsanti IT / EN in alto
-- **Preset di stile:** salva le tue impostazioni e riapplicale ad altri libri
-- Funziona anche offline dopo la prima apertura (tranne la ricerca online)
+**Interfaccia**
+- **Italiano e inglese:** al primo avvio propone la lingua del dispositivo; si cambia in ogni momento con i pulsanti IT / EN
+- Tema chiaro e scuro automatico, adatta a telefono, tablet e computer
+- Installabile e utilizzabile offline (tranne la ricerca online)
 
-## Installarla come app
+### Limiti noti
 
-1. Apri l'indirizzo dell'app con **Chrome**.
-2. Dal menu ⋮ scegli **Installa app** (o "Aggiungi a schermata Home").
-3. Troverai l'icona tra le tue app, come una normale applicazione.
-
-## Come si usa
-
-1. Tocca **Scegli un file EPUB** e seleziona il libro (anche da Google Drive, tramite il selettore file del dispositivo).
-2. Modifica i campi e le opzioni che ti servono. Le sezioni vuote non cambiano nulla.
-3. Premi **Salva EPUB**: scarichi un nuovo file, l'originale non viene toccato.
-
-> Consiglio: provala sempre su una copia del libro prima di sovrascrivere l'originale.
-
-
-## Limiti noti
-
-- La ricerca e la sostituzione agiscono dentro un singolo blocco di testo: una frase interrotta da un grassetto o da un corsivo non viene trovata.
+- Cerca e sostituisci agisce dentro un singolo blocco di testo: una frase interrotta da un grassetto o da un corsivo non viene trovata.
 - Alcune app di lettura (per esempio Kindle o Apple Books) ignorano margini e carattere se l'utente ha impostato i propri.
-- La ricerca online richiede connessione e dipende da servizi esterni, che possono rifiutare temporaneamente le richieste. A volte la copertina non si riesce a scaricare: in quel caso puoi scegliere tu l'immagine.
+- La ricerca online richiede connessione e dipende da servizi esterni che possono rifiutare temporaneamente le richieste.
 - Il controllo del libro segnala i problemi ma non li corregge.
-- Il controllo ortografico usa un dizionario, non un'intelligenza artificiale: i suggerimenti sono quelli del dizionario. Non conosce i nomi propri e i termini inventati (vanno ignorati) e per impostazione predefinita salta le parole con l'iniziale maiuscola, quindi un errore a inizio frase può sfuggire. Non verifica la grammatica.
+- Il correttore usa un dizionario, non un'intelligenza artificiale: non conosce nomi propri e termini inventati (vanno ignorati), per impostazione predefinita salta le parole con iniziale maiuscola e non verifica la grammatica.
+- Testata su Chrome; su altri browser alcune funzioni potrebbero comportarsi diversamente.
+
+---
+
+## English
+
+**Colophon** is a web app (PWA) to edit **EPUB** files right in your browser: metadata, cover, style, table of contents and text. It is a lightweight alternative to Calibre's editing features and works on Chromebook, Android, Windows, macOS and Linux. It can be installed like a regular app and, after the first visit, used without a connection.
+
+> **Privacy:** your books are never uploaded to any server. Every file is read, edited and saved on your device. The original is never touched: saving creates a new file.
+
+### How it works
+
+1. Open an EPUB file (Google Drive files work too, through your device's file picker).
+2. Change the fields and options you need: sections left empty change nothing.
+3. Save: you download a new EPUB with your changes.
+
+An EPUB is a ZIP archive of XHTML pages, images and a description file (OPF). Colophon reads it in the browser, applies your changes to the files involved and repackages it following the format's rules.
+
+### Features
+
+**Metadata and cover**
+- Title, authors, series and number, publisher, language, date, tags and description
+- Cover replacement (JPG or PNG)
+- **Online lookup** of title, author and cover (Google Books, with Open Library as a fallback)
+- File renaming with a template, for example `{series} {number} - {title}`
+
+**Style and layout**, with a live preview of the first chapter
+- Margins, line height, paragraph spacing, first-line indent, text size
+- Alignment, hyphenation, typeface (Serif or Sans serif)
+- Drop caps after headings, centered or left-aligned headings
+- **Style presets** you can save and reapply to other books
+- Removal of publisher-imposed styles (colors, fonts, sizes) or of all styles
+
+**Text cleanup**
+- Guillemets «…» or curly quotes “…”, typographic apostrophes
+- Three dots to an ellipsis …, double spaces, space before punctuation, dialogue with em dashes
+- **Find, replace and delete** across the whole book, with optional regular expressions and occurrence counts
+
+**Spell checker**
+- Finds words missing from the dictionary, in **Italian or English** (for example scanning errors such as "vImperatore")
+- Shows the sentence where each word appears and suggests a fix; you choose which ones to apply to the whole book
+- Works offline (Hunspell compiled to WebAssembly) and can ignore proper names
+
+**Book structure**
+- **Table of contents:** rename, move, change level or delete entries; regenerate it from the chapters
+- **Book check:** reports missing or undeclared files, broken links and images, invalid markup, missing data
+- **Statistics:** chapters, words and estimated reading time
+
+**Interface**
+- **Italian and English:** on first launch it proposes your device's language; switch at any time with the IT / EN buttons
+- Automatic light and dark theme, designed for phones, tablets and desktops
+- Installable and usable offline (except online lookup)
+
+### Known limitations
+
+- Find and replace works inside a single block of text: a sentence interrupted by bold or italic markup is not matched.
+- Some reading apps (for example Kindle or Apple Books) ignore margins and typeface when the reader has set their own.
+- Online lookup needs a connection and relies on external services that may temporarily refuse requests.
+- The book check reports problems but does not fix them.
+- The spell checker uses a dictionary, not AI: it does not know proper names or invented terms (ignore them), skips capitalized words by default and does not check grammar.
+- Tested on Chrome; other browsers may behave differently.
+
+---
+
+## Project / Progetto
+
+A static site: no build step, no backend. / Un sito statico: nessuna compilazione, nessun server.
+
+| File | |
+|---|---|
+| `index.html` | The whole app (HTML, CSS, JavaScript) / L'app completa |
+| `manifest.webmanifest`, `sw.js` | Installation and offline cache / Installazione e cache offline |
+| `icon.svg`, `icon-192.png`, `icon-512.png` | Icons / Icone |
+| `hunspell.bundle.js`, `dict/` | Spell checker engine and dictionaries / Motore e dizionari del correttore |
+
+**Libraries / Librerie:** [JSZip](https://stuk.github.io/jszip/) (read and write EPUB archives), [hunspell-asm](https://github.com/kwonoj/hunspell-asm) (MIT), Italian dictionary from [wooorm/dictionaries](https://github.com/wooorm/dictionaries) (GPL-3.0) and English dictionary (MIT and BSD). License texts are in `dict/`.

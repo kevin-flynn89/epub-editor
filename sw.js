@@ -1,5 +1,5 @@
-var C = "colophon-v1";
-var SHELL = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png",
+var C = "colophon-v2";
+var SHELL = ["./", "index.html", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png",
   "hunspell.bundle.js", "dict/it.aff", "dict/it.dic", "dict/en.aff", "dict/en.dic",
   "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"];
 self.addEventListener("install", function (e) {

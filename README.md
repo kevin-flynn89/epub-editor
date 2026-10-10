@@ -4,10 +4,8 @@
 
 **I tuoi libri non vengono mai caricati su nessun server**: i file sono letti, modificati e salvati sul tuo dispositivo.
 
-- App online: `https://NOME-PROGETTO.pages.dev` *(sostituisci con il tuo indirizzo Cloudflare)*
-- Copia di riserva: https://kevin-flynn89.github.io/epub-editor/
 
-## Screenshot
+## Screenshots
 
 <table>
   <tr>
@@ -71,33 +69,6 @@
 
 > Consiglio: provala sempre su una copia del libro prima di sovrascrivere l'originale.
 
-## Struttura del progetto
-
-Non serve nessuna compilazione: è una semplice pagina statica.
-
-| File | A cosa serve |
-|---|---|
-| `index.html` | L'app completa (HTML, CSS e JavaScript in un unico file) |
-| `manifest.webmanifest` | Nome e icone per l'installazione come app |
-| `sw.js` | Service worker: uso offline e cache |
-| `icon-192.png`, `icon-512.png` | Icone dell'app |
-| `hunspell.bundle.js` | Motore del correttore ortografico (Hunspell compilato in WebAssembly) |
-| `dict/` | Dizionari italiano e inglese (`it.*`, `en.*`) con le relative licenze |
-| `README.md`, `docs/` | Questa documentazione e gli screenshot (non servono per pubblicare l'app) |
-
-Librerie: [JSZip](https://stuk.github.io/jszip/), caricata da CDN, per leggere e scrivere i file EPUB (che sono archivi ZIP); [hunspell-asm](https://github.com/kwonoj/hunspell-asm) (licenza MIT) e i dizionari [dictionary-it](https://github.com/wooorm/dictionaries) (italiano, licenza GPL-3.0) e dictionary-en (inglese, licenza MIT e BSD), con i testi delle licenze in `dict/`, inclusi nel progetto.
-
-## Pubblicazione e aggiornamenti
-
-**Cloudflare Pages (versione principale)**
-1. Dalla dashboard di Cloudflare: **Workers & Pages → Create application → Pages → Drag and drop your files**.
-2. Carica **tutti i file dell'app** (`index.html`, `manifest.webmanifest`, `sw.js`, le due icone, `hunspell.bundle.js` e la cartella `dict/` completa), come cartella o come file zip. Non caricare `README.md` e `docs/`.
-3. Per aggiornare: nel progetto, scheda **Deployments**, crea una nuova distribuzione e carica i file nuovi.
-
-**GitHub (copia di sicurezza)**
-Tieni i file nel repository come archivio. Con GitHub Pages attivo (Settings → Pages → `main` / root) la stessa app è raggiungibile anche dall'indirizzo `github.io`.
-
-**Importante a ogni modifica:** cambia il numero di versione della cache in `sw.js`, per esempio da `colophon-v1` a `colophon-v2`. Senza questo cambio i telefoni continuano a mostrare la versione vecchia.
 
 ## Limiti noti
 
@@ -106,13 +77,3 @@ Tieni i file nel repository come archivio. Con GitHub Pages attivo (Settings →
 - La ricerca online richiede connessione e dipende da servizi esterni, che possono rifiutare temporaneamente le richieste. A volte la copertina non si riesce a scaricare: in quel caso puoi scegliere tu l'immagine.
 - Il controllo del libro segnala i problemi ma non li corregge.
 - Il controllo ortografico usa un dizionario, non un'intelligenza artificiale: i suggerimenti sono quelli del dizionario. Non conosce i nomi propri e i termini inventati (vanno ignorati) e per impostazione predefinita salta le parole con l'iniziale maiuscola, quindi un errore a inizio frase può sfuggire. Non verifica la grammatica.
-- Le traduzioni sono due (italiano e inglese). Per aggiungere una lingua basta un nuovo elenco di traduzioni in `index.html` (oggetto `EN`) e, per il correttore, un dizionario Hunspell in `dict/`.
-- Testata su Chrome (Chromebook): su altri browser alcune funzioni potrebbero comportarsi diversamente.
-
----
-
-## English summary
-
-**Colophon** is a free, offline-capable PWA to edit EPUB **metadata, cover, style and table of contents** in the browser, with online metadata lookup, text cleanup, find/replace and a **spell checker** (Italian and English dictionaries, you choose which corrections to apply). The interface is available in **Italian and English**: on first launch it proposes the language of your device and you can switch at any time with the IT / EN buttons. Your books never leave your device.
-
-To publish: upload all the app files (including `hunspell.bundle.js` and the whole `dict/` folder) to any static hosting such as Cloudflare Pages or GitHub Pages. Bump the cache name in `sw.js` after every change so installed copies update.

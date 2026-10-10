@@ -1,0 +1,4 @@
+Dizionari per il controllo ortografico (Hunspell): pacchetti npm 'dictionary-it' (it_IT, licenza GPL-3.0, testo in LICENSE-dizionario-GPL3.txt) e 'dictionary-en' (en_US, licenza MIT e BSD, testo in LICENSE-dizionario-EN.txt).
+Motore: 'hunspell-asm' (Hunspell compilato in WebAssembly), licenza MIT, incluso in hunspell.bundle.js.
+
+Spell-check dictionaries (Hunspell): npm packages 'dictionary-it' (it_IT, GPL-3.0) and 'dictionary-en' (en_US, MIT and BSD). Engine: 'hunspell-asm' (MIT).

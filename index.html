@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<title>Editor EPUB (nuova grafica)</title>
+<title>Colophon – Editor EPUB</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#0e6e7e">
@@ -59,6 +59,19 @@ label.btn{display:inline-block;margin:0;text-align:center}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
 .grid2>div,.row>div{min-width:0}
 .opt .check{margin-top:10px}
+.lang{display:flex;justify-content:flex-end;gap:4px;margin:0 0 10px}
+.lang button{font:600 .8rem "Public Sans",system-ui,sans-serif;padding:4px 11px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;border-radius:999px}
+.lang button[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.ob{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(10,18,26,.62);padding:16px}
+.ob[hidden]{display:none}
+.ob-card{background:var(--panel);color:var(--ink);border-radius:14px;padding:22px;max-width:380px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.ob-card h2{font:700 1.2rem/1.3 Literata,Georgia,serif;margin:0 0 8px}
+.ob-btns{display:grid;gap:10px;margin-top:16px}
+.sprow{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px}
+.sprow .check{margin-top:0}
+.sprow .ctx{margin:6px 0;overflow-wrap:anywhere}
+.sprow mark{background:color-mix(in srgb,var(--err) 18%,transparent);color:inherit;border-radius:3px;padding:0 2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .pvbox{position:sticky;top:0;z-index:2;background:var(--bg);padding:10px 0 4px}
 #pv{max-height:32vh;overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-top:6px;font:16px/1.4 Georgia,"Times New Roman",serif}
 #pv h1{font-size:1.3em;margin:.2em 0 .5em}
@@ -123,9 +136,10 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
 </head>
 <body>
 <main>
+  <div class="lang" id="lang-sw" role="group" aria-label="Lingua / Language" data-notr><button type="button" data-l="it" aria-pressed="false">IT</button><button type="button" data-l="en" aria-pressed="false">EN</button></div>
   <header class="top">
     <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/></svg></span>
-    <div><h1>Editor metadati EPUB</h1>
+    <div><h1>Colophon</h1>
     <p class="sub">Apri un EPUB, modifica metadati, copertina, stile e indice, poi salva. Il file resta sul tuo dispositivo.</p></div>
   </header>
 
@@ -208,6 +222,16 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
       <div class="actions"><button class="btn ghost" id="r-count" type="button">Conta le occorrenze</button></div>
       <div class="small" id="r-out" style="margin-top:8px"></div>
     </details>
+    <details class="opt"><summary>Controllo ortografico</summary>
+      <div class="small">Cerca le parole che non sono nel dizionario e propone una correzione. Scegli tu quali applicare: la correzione vale per tutto il libro e viene scritta quando salvi.</div>
+      <label for="sp-lang">Dizionario</label>
+      <select id="sp-lang"><option value="it">Italiano</option><option value="en">English</option></select>
+      <label class="check"><input type="checkbox" id="sp-names" checked> Ignora le parole con l'iniziale maiuscola (nomi propri)</label>
+      <div class="actions"><button class="btn ghost" id="sp-run" type="button">Controlla l'ortografia</button></div>
+      <div class="small" id="sp-out" style="margin-top:8px"></div>
+      <div class="actions" id="sp-bulk" style="display:none"><button class="btn ghost sm" id="sp-all" type="button">Seleziona tutte</button><button class="btn ghost sm" id="sp-none" type="button">Deseleziona tutte</button><button class="btn ghost sm" id="sp-reset" type="button">Dimentica le parole ignorate</button></div>
+      <div id="sp-list"></div>
+    </details>
     </div>
     <details class="opt"><summary>Preset di stile</summary>
       <div class="small">Salva le impostazioni di stile, pulizia e ricerca per riapplicarle ad altri libri.</div>
@@ -248,6 +272,13 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
   </section>
   <div class="msg" id="msg" role="status"></div>
 </main>
+<div class="ob" id="onboard" role="dialog" aria-modal="true" aria-labelledby="ob-title" data-notr hidden>
+  <div class="ob-card">
+    <h2 id="ob-title">Scegli la lingua · Choose your language</h2>
+    <p class="small">Potrai cambiarla in seguito dai pulsanti IT / EN in alto.<br>You can change it later with the IT / EN buttons at the top.</p>
+    <div class="ob-btns"><button type="button" class="btn" data-l="it">Italiano</button><button type="button" class="btn" data-l="en">English</button></div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
@@ -256,6 +287,53 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
   var $ = function (id) { return document.getElementById(id); };
   var zip, opfPath, doc, meta, fileName, initial = {}, newCover = null;
   var ids = ["title", "authors", "series", "index", "publisher", "lang", "date", "tags", "desc"];
+  var EN = {"Colophon – Editor EPUB": "Colophon – EPUB editor", "Apri un EPUB, modifica titolo, autori, serie e copertina, poi salva. Il file resta sul tuo dispositivo.": "Open an EPUB, edit title, authors, series and cover, then save. Your file stays on your device.", "Apri un EPUB, modifica metadati, copertina, stile e indice, poi salva. Il file resta sul tuo dispositivo.": "Open an EPUB, edit metadata, cover, style and table of contents, then save. Your file stays on your device.", "Scegli un file EPUB": "Choose an EPUB file", "Tocca qui oppure trascina il file": "Tap here or drag the file in", "Cambia copertina": "Change cover", "Cerca online": "Search online", "Titolo": "Title", "Autori": "Authors", "(separati da punto e virgola)": "(separated by semicolons)", "Serie": "Series", "Numero": "Number", "Editore": "Publisher", "Lingua": "Language", "Data di pubblicazione": "Publication date", "Tag": "Tags", "(separati da virgola)": "(separated by commas)", "Descrizione": "Description", "Anteprima del primo capitolo con testo (si aggiorna mentre cambi le opzioni)": "Preview of the first chapter with text (updates as you change the options)", "Anteprima del primo capitolo con testo": "Preview of the first chapter with text", "Nascondi": "Hide", "Mostra": "Show", "Stile e impaginazione": "Style and layout", "Lascia vuoto per non cambiare nulla.": "Leave empty to keep things unchanged.", "Margini laterali (%)": "Side margins (%)", "Interlinea": "Line spacing", "Spazio tra paragrafi (em)": "Paragraph spacing (em)", "Rientro prima riga (em)": "First-line indent (em)", "Dimensione testo (%)": "Text size (%)", "Allineamento": "Alignment", "Invariato": "Unchanged", "Invariata": "Unchanged", "Invariati": "Unchanged", "Invariate": "Unchanged", "A sinistra": "Left", "Giustificato": "Justified", "Sillabazione": "Hyphenation", "Attiva": "On", "Disattivata": "Off", "Carattere": "Font", "Serif": "Serif", "Sans serif": "Sans serif", "Capolettera": "Drop cap", "Nessuno": "None", "Dopo i titoli": "After headings", "Titoli": "Headings", "Centrati": "Centered", "Pulizia del testo": "Text cleanup", "Virgolette": "Quotation marks", "Caporali «…»": "Guillemets «…»", "Inglesi “…”": "English “…”", "Apostrofi tipografici (l’amico)": "Typographic apostrophes (don’t)", "Tre puntini diventano …": "Three dots become …", "Elimina gli spazi doppi": "Remove double spaces", "Elimina lo spazio prima della punteggiatura": "Remove space before punctuation", "Dialoghi con trattino lungo (—)": "Dialogue lines with an em dash (—)", "Cerca, sostituisci ed elimina": "Find, replace and delete", "Elimina questi testi": "Delete these texts", "(uno per riga)": "(one per line)", "Sostituisci": "Replace", "(una regola per riga: cerca => sostituisci)": "(one rule per line: find => replace)", "Distingui maiuscole e minuscole": "Match case", "Usa espressioni regolari (avanzato)": "Use regular expressions (advanced)", "Conta le occorrenze": "Count matches", "Controllo ortografico": "Spell check", "Cerca le parole che non sono nel dizionario e propone una correzione. Scegli tu quali applicare: la correzione vale per tutto il libro e viene scritta quando salvi.": "Finds words that are not in the dictionary and suggests a correction. You choose which ones to apply: the correction applies to the whole book and is written when you save.", "Dizionario": "Dictionary", "Italiano": "Italian", "English": "English", "Ignora le parole con l'iniziale maiuscola (nomi propri)": "Ignore words starting with a capital letter (proper names)", "Controlla l'ortografia": "Check spelling", "Seleziona tutte": "Select all", "Deseleziona tutte": "Deselect all", "Dimentica le parole ignorate": "Forget ignored words", "Preset di stile": "Style presets", "Salva le impostazioni di stile, pulizia e ricerca per riapplicarle ad altri libri.": "Save your style, cleanup and search settings to reuse them on other books.", "Nome del preset": "Preset name", "Salva preset": "Save preset", "Preset salvati": "Saved presets", "Applica": "Apply", "Elimina": "Delete", "Pulizia dello stile del libro": "Book style cleanup", "Toglie ciò che l'editore ha imposto, così il tuo lettore usa le sue impostazioni.": "Removes what the publisher imposed, so your reader app uses its own settings.", "Togli i colori (testo e sfondo)": "Remove colors (text and background)", "Togli caratteri e dimensioni imposti": "Remove imposed fonts and sizes", "Togli tutti i fogli di stile e gli stili nel testo": "Remove all stylesheets and inline styles", "Indice del libro": "Table of contents", "Rinomina, sposta o elimina le voci. Il rientro mostra il livello.": "Rename, move or delete entries. Indentation shows the level.", "Rigenera dai capitoli": "Rebuild from chapters", "Controllo del libro": "Book check", "Controlla il libro": "Check the book", "Statistiche del libro": "Book statistics", "Calcola": "Calculate", "Rinomina il file con questo modello": "Rename the file with this template", "Modello del nome del file": "File name template", "Puoi usare {autore} {titolo} {serie} {numero} {anno}": "You can use {author} {title} {series} {number} {year}", "{autore} - {titolo}": "{author} - {title}", "Salva EPUB": "Save EPUB", "Apri un altro file": "Open another file", "AAAA-MM-GG": "YYYY-MM-DD", "es. 1.4": "e.g. 1.4", "es. 100": "e.g. 100", "es. Romanzi": "e.g. Novels", "Scrivi la correzione": "Type the correction", "Apro il file…": "Opening the file…", "Libreria non caricata. Ricarica la pagina.": "Library not loaded. Reload the page.", "Questo file non sembra un EPUB valido. Scegli un altro file.": "This file doesn't look like a valid EPUB. Choose another file.", "File salvato: {0}": "File saved: {0}", "Salvataggio annullato.": "Save cancelled.", "Non sono riuscito a salvare il file. Riprova.": "I couldn't save the file. Try again.", "Usa un'immagine JPG o PNG.": "Use a JPG or PNG image.", "Nuova copertina pronta: verrà applicata al salvataggio.": "New cover ready: it will be applied when you save.", "Scrivi almeno il titolo per cercare.": "Enter at least the title to search.", "Cerco online…": "Searching online…", "rete": "network", "Ricerca non riuscita ({0}).": "Search failed ({0}).", "Nessun risultato. Prova a correggere titolo o autore.": "No results. Try correcting the title or author.", "Tocca un risultato per applicarlo ai campi.": "Tap a result to apply it to the fields.", "(senza titolo)": "(untitled)", "Dati applicati. Controlla i campi e salva.": "Data applied. Check the fields and save.", "Dati e copertina applicati. Controlla i campi e salva.": "Data and cover applied. Check the fields and save.", "Dati applicati. Copertina non scaricata ({0}): puoi sceglierla con “Cambia copertina”.": "Data applied. Cover not downloaded ({0}): you can choose it with “Change cover”.", "Elaboro i capitoli…": "Processing the chapters…", "{0} capitoli aggiornati": "{0} chapters updated", "1 capitolo aggiornato": "1 chapter updated", "{0} saltati": "{0} skipped", "Nessun capitolo da mostrare.": "No chapter to show.", "Nessuna voce di indice trovata.": "No table of contents entries found.", "Sposta su": "Move up", "Sposta giù": "Move down", "Livello precedente": "Previous level", "Livello successivo": "Next level", "Il libro non ha un file di indice da aggiornare.": "The book has no table of contents file to update.", "Capitolo": "Chapter", "Controllo in corso…": "Checking…", "Manca il file mimetype.": "The mimetype file is missing.", "Il file mimetype ha un contenuto errato.": "The mimetype file has wrong content.", "File dichiarato ma mancante: {0}": "File declared but missing: {0}", "File non dichiarato nel libro: {0}": "File not declared in the book: {0}", "La sequenza di lettura cita un elemento inesistente: {0}": "The reading order refers to a missing item: {0}", "Codice non valido (XML) in {0}": "Invalid code (XML) in {0}", "Collegamento rotto in {0}: {1}": "Broken link in {0}: {1}", "Manca il titolo.": "Title is missing.", "Manca l'autore.": "Author is missing.", "Manca la lingua.": "Language is missing.", "Manca la copertina.": "Cover is missing.", "Manca il file dell'indice.": "Table of contents file is missing.", "Non sono riuscito a completare il controllo.": "I couldn't complete the check.", "…e altri {0}": "…and {0} more", "✓ Nessun problema trovato.": "✓ No problems found.", "Problemi": "Problems", "Avvisi": "Warnings", "Scrivi almeno un testo da cercare.": "Enter at least one text to search for.", "Conto…": "Counting…", "{0} occorrenze trovate (in ogni capitolo, dentro lo stesso blocco di testo).": "{0} matches found (within a single block of text in each chapter).", "Calcolo…": "Calculating…", "Capitoli con testo: {0} · Parole: {1} · Lettura: circa {2} (a 230 parole al minuto)": "Chapters with text: {0} · Words: {1} · Reading time: about {2} (at 230 words per minute)", "Nessun preset salvato": "No saved presets", "Scrivi un nome per il preset.": "Enter a name for the preset.", "Preset salvato: {0}": "Preset saved: {0}", "Non riesco a salvare il preset in questo browser.": "I can't save the preset in this browser.", "Scegli un preset salvato.": "Choose a saved preset.", "Preset applicato.": "Preset applied.", "Preset eliminato.": "Preset deleted.", "file mancante: {0}": "missing file: {0}", "dizionario non trovato": "dictionary not found", "errore": "error", "Correzione per {0}": "Correction for {0}", "Ignora": "Ignore", "({0} volte)": "({0} times)", "(1 volta)": "(1 time)", "Carico il dizionario…": "Loading the dictionary…", "Non riesco a caricare il dizionario ({0}).": "I can't load the dictionary ({0}).", "Controllo il testo… ({0}/{1})": "Checking the text… ({0}/{1})", "✓ Nessuna parola sospetta trovata.": "✓ No suspicious words found.", "Preparo i suggerimenti… ({0}/{1})": "Preparing suggestions… ({0}/{1})", "{0} parole sospette (mostro le prime {1}, dalle più rare). Spunta quelle da correggere e controlla la correzione proposta; i nomi propri puoi ignorarli.": "{0} suspicious words (showing the first {1}, rarest first). Tick the ones to fix and check the suggested correction; you can ignore proper names.", "{0} parole sospette. Spunta quelle da correggere e controlla la correzione proposta; i nomi propri puoi ignorarli.": "{0} suspicious words. Tick the ones to fix and check the suggested correction; you can ignore proper names.", "Parole ignorate dimenticate. Rilancia il controllo.": "Ignored words forgotten. Run the check again."};
+  var LKEY = "epubLang", LANG = "it", TXT = new WeakMap(), ATT = new WeakMap();
+  function T(s) { return LANG === "en" && Object.prototype.hasOwnProperty.call(EN, s) ? EN[s] : s; }
+  function TF(s) { var a = Array.prototype.slice.call(arguments, 1); return T(s).replace(/\{(\d)\}/g, function (m, i) { return a[+i]; }); }
+  function norm(x) { return x.replace(/\s+/g, " ").trim(); }
+  function applyLang() {
+    document.documentElement.lang = LANG;
+    document.title = T("Colophon – Editor EPUB");
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), n, list = [];
+    while ((n = w.nextNode())) list.push(n);
+    list.forEach(function (n) {
+      var par = n.parentNode;
+      if (par.closest("script,style,[data-notr],#pv,.sprow,#toc,#report,#results")) return;
+      var orig = TXT.has(n) ? TXT.get(n) : n.nodeValue, key = norm(orig);
+      if (!key || !Object.prototype.hasOwnProperty.call(EN, key)) return;
+      TXT.set(n, orig);
+      n.nodeValue = orig.match(/^\s*/)[0] + T(key) + orig.match(/\s*$/)[0];
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[placeholder],[aria-label],[title]"), function (e) {
+      if (e.closest("[data-notr],.sprow,#toc")) return;
+      ["placeholder", "aria-label", "title"].forEach(function (a) {
+        if (!e.hasAttribute(a)) return;
+        var m = ATT.get(e) || {}, orig = (a in m) ? m[a] : e.getAttribute(a);
+        if (!Object.prototype.hasOwnProperty.call(EN, orig)) return;
+        m[a] = orig; ATT.set(e, m); e.setAttribute(a, T(orig));
+      });
+    });
+    var tp = $("f-tpl"), D = { it: "{autore} - {titolo}", en: "{author} - {title}" };
+    if (tp.value === D.it || tp.value === D.en) tp.value = D[LANG];
+    Array.prototype.forEach.call(document.querySelectorAll("#lang-sw button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-l") === LANG ? "true" : "false"); });
+  }
+  function setLang(l, initial, persist) {
+    LANG = l;
+    if (persist) { try { localStorage.setItem(LKEY, l); } catch (e) {} }
+    applyLang();
+    if (!initial) {
+      ["report", "stats", "r-out", "sp-out", "results", "sp-list"].forEach(function (id) { $(id).textContent = ""; });
+      $("sp-bulk").style.display = "none"; say("");
+      if (toc.length) renderToc();
+    }
+    listPresets();
+  }
+  function detectLang() {
+    var ls = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || "en"];
+    for (var i = 0; i < ls.length; i++) { var c = String(ls[i]).slice(0, 2).toLowerCase(); if (c === "it" || c === "en") return c; }
+    return "en";
+  }
 
   function say(t, err) { var m = $("msg"); m.textContent = t || ""; m.className = "msg" + (err ? " err" : ""); }
   function dirOf(p) { return p.indexOf("/") >= 0 ? p.slice(0, p.lastIndexOf("/") + 1) : ""; }
@@ -273,9 +351,9 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
   function plain(s) { return s ? (new DOMParser().parseFromString(s, "text/html").body.textContent || "").trim() : ""; }
 
   async function openFile(file) {
-    say("Apro il file…");
+    say(T("Apro il file…"));
     try {
-      if (typeof JSZip === "undefined") { say("Libreria non caricata. Ricarica la pagina.", true); return; }
+      if (typeof JSZip === "undefined") { say(T("Libreria non caricata. Ricarica la pagina."), true); return; }
       zip = await JSZip.loadAsync(file);
       var c = zip.file("META-INF/container.xml");
       if (!c) throw new Error("container");
@@ -288,7 +366,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
       meta = doc.getElementsByTagNameNS(OPF, "metadata")[0];
       if (!meta) throw new Error("meta");
     } catch (e) {
-      say("Questo file non sembra un EPUB valido. Scegli un altro file.", true);
+      say(T("Questo file non sembra un EPUB valido. Scegli un altro file."), true);
       return;
     }
     fileName = file.name; newCover = null;
@@ -304,8 +382,9 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
       desc: plain(dcv("description")[0])
     };
     ids.forEach(function (k) { $("f-" + k).value = initial[k]; });
+    $("sp-lang").value = /^en/i.test(initial.lang) ? "en" : /^it/i.test(initial.lang) ? "it" : LANG;
     $("fname").textContent = fileName; $("results").innerHTML = "";
-    $("fsize").textContent = (file.size / 1048576).toFixed(1).replace(".", ",") + " MB";
+    $("fsize").textContent = (file.size / 1048576).toFixed(1).replace(".", LANG === "it" ? "," : ".") + " MB";
     $("cover").style.backgroundImage = "";
     var it = coverItem();
     if (it) {
@@ -315,7 +394,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
     $("drop").style.display = "none";
     $("book").style.display = "block";
     renderPreview();
-    $("report").textContent = ""; $("stats").textContent = ""; $("r-out").textContent = "";
+    $("report").textContent = ""; $("stats").textContent = ""; $("r-out").textContent = ""; $("sp-list").innerHTML = ""; $("sp-out").textContent = ""; $("sp-bulk").style.display = "none";
     loadToc().then(renderToc);
     say("");
   }
@@ -372,7 +451,8 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
       if ($("rename").checked) {
         var idx = val("index");
         var vals = { autore: split(val("authors"), ";")[0] || "", titolo: val("title"), serie: val("series"), numero: idx ? String(idx).padStart(2, "0") : "", anno: (val("date").match(/\d{4}/) || [""])[0] };
-        var nm = ($("f-tpl").value || "{autore} - {titolo}").replace(/\{(\w+)\}/g, function (m, k) { return vals[k] || ""; });
+        vals.author = vals.autore; vals.title = vals.titolo; vals.series = vals.serie; vals.number = vals.numero; vals.year = vals.anno;
+        var nm = ($("f-tpl").value || T("{autore} - {titolo}")).replace(/\{(\w+)\}/g, function (m, k) { return vals[k] || ""; });
         nm = nm.replace(/[\\\/:*?"<>|]+/g, "").replace(/(\s*-\s*){2,}/g, " - ").replace(/\s{2,}/g, " ").replace(/^[\s-]+|[\s-]+$/g, "");
         if (nm) name = nm.slice(0, 150) + ".epub";
       }
@@ -384,10 +464,10 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
         link.href = URL.createObjectURL(blob); link.download = name;
         document.body.appendChild(link); link.click(); link.remove();
       }
-      say("File salvato: " + name + (bookNote || ""));
+      say(TF("File salvato: {0}", name) + (bookNote || ""));
     } catch (e) {
-      if (e && e.code === "declined") { say("Salvataggio annullato."); return; }
-      say("Non sono riuscito a salvare il file. Riprova.", true);
+      if (e && e.code === "declined") { say(T("Salvataggio annullato.")); return; }
+      say(T("Non sono riuscito a salvare il file. Riprova."), true);
     }
   }
 
@@ -398,12 +478,12 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
   $("coverfile").addEventListener("change", function () {
     var f = this.files[0]; this.value = "";
     if (!f) return;
-    if (f.type !== "image/jpeg" && f.type !== "image/png") { say("Usa un'immagine JPG o PNG.", true); return; }
+    if (f.type !== "image/jpeg" && f.type !== "image/png") { say(T("Usa un'immagine JPG o PNG."), true); return; }
     newCover = f;
     var r = new FileReader();
     r.onload = function () { $("cover").style.backgroundImage = "url(" + r.result + ")"; };
     r.readAsDataURL(f);
-    say("Nuova copertina pronta: verrà applicata al salvataggio.");
+    say(T("Nuova copertina pronta: verrà applicata al salvataggio."));
   });
   function imgUrl(u) { return (u || "").replace(/^http:/, "https:"); }
   var LANGS = { ita: "it", eng: "en", fre: "fr", fra: "fr", ger: "de", deu: "de", spa: "es", por: "pt", lat: "la" };
@@ -435,25 +515,25 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
 
   async function search() {
     var t = val("title"), a = split(val("authors"), ";")[0] || "", box = $("results");
-    if (!t) { say("Scrivi almeno il titolo per cercare.", true); return; }
-    say("Cerco online…"); box.innerHTML = "";
+    if (!t) { say(T("Scrivi almeno il titolo per cercare."), true); return; }
+    say(T("Cerco online…")); box.innerHTML = "";
     var errs = [], list = [];
-    try { list = await fromGoogle(t, a); } catch (e) { errs.push("Google Books: " + (e.message || "rete")); }
+    try { list = await fromGoogle(t, a); } catch (e) { errs.push("Google Books: " + (e.message || T("rete"))); }
     if (!list.length) {
-      try { list = await fromOpenLibrary(t, a); } catch (e) { errs.push("Open Library: " + (e.message || "rete")); }
+      try { list = await fromOpenLibrary(t, a); } catch (e) { errs.push("Open Library: " + (e.message || T("rete"))); }
     }
     if (!list.length) {
-      say(errs.length ? "Ricerca non riuscita (" + errs.join("; ") + ")." : "Nessun risultato. Prova a correggere titolo o autore.", !!errs.length);
+      say(errs.length ? TF("Ricerca non riuscita ({0}).", errs.join("; ")) : T("Nessun risultato. Prova a correggere titolo o autore."), !!errs.length);
       return;
     }
-    say("Tocca un risultato per applicarlo ai campi.");
+    say(T("Tocca un risultato per applicarlo ai campi."));
     list.forEach(function (v) {
       var b = document.createElement("button");
       b.type = "button"; b.className = "hit";
       var img = document.createElement("img"); img.alt = "";
       if (v.thumb) img.src = v.thumb;
       var txt = document.createElement("span"), h = document.createElement("strong"), sm = document.createElement("small");
-      h.textContent = v.title || "(senza titolo)";
+      h.textContent = v.title || T("(senza titolo)");
       sm.textContent = [v.authors.join(", "), v.publisher, (v.date || "").slice(0, 4)].filter(Boolean).join(" – ");
       txt.appendChild(h); txt.appendChild(sm); b.appendChild(img); b.appendChild(txt);
       b.addEventListener("click", function () { applyHit(v); });
@@ -466,7 +546,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
     put("title", v.title); put("authors", v.authors.join("; ")); put("publisher", v.publisher);
     put("lang", v.language); put("date", v.date); put("tags", v.tags.join(", ")); put("desc", v.desc);
     $("results").innerHTML = "";
-    if (!v.cover) { say("Dati applicati. Controlla i campi e salva."); return; }
+    if (!v.cover) { say(T("Dati applicati. Controlla i campi e salva.")); return; }
     try {
       var rr = await fetch(v.cover);
       if (!rr.ok) throw new Error(rr.status);
@@ -476,9 +556,9 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
       var fr = new FileReader();
       fr.onload = function () { $("cover").style.backgroundImage = "url(" + fr.result + ")"; };
       fr.readAsDataURL(bl);
-      say("Dati e copertina applicati. Controlla i campi e salva.");
+      say(T("Dati e copertina applicati. Controlla i campi e salva."));
     } catch (e) {
-      say("Dati applicati. Copertina non scaricata (" + (e.message || "rete") + "): puoi sceglierla con “Cambia copertina”.");
+      say(TF("Dati applicati. Copertina non scaricata ({0}): puoi sceglierla con “Cambia copertina”.", e.message || T("rete")));
     }
   }
 
@@ -509,6 +589,12 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
     }
     $("r-del").value.split("\n").forEach(function (l) { l = l.replace(/\r$/, ""); if (l.trim()) mk(l, ""); });
     $("r-rep").value.split("\n").forEach(function (l) { var k = l.indexOf("=>"); if (k > 0 && l.slice(0, k).trim()) mk(l.slice(0, k).trim(), l.slice(k + 2).trim()); });
+    document.querySelectorAll("#sp-list .sprow").forEach(function (r) {
+      if (!r.querySelector(".sp-on").checked) return;
+      var from = r.getAttribute("data-w"), to = r.querySelector(".sp-to").value.trim();
+      if (!to || to === from) return;
+      o.rules.push({ re: new RegExp("(?<![\\p{L}\\p{M}])" + from + "(?![\\p{L}\\p{M}])", "gu"), to: to.replace(/\$/g, "$$$$") });
+    });
     return o;
   }
 
@@ -556,7 +642,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
     var hasTxt = !!(o.quotes || o.apos || o.dots || o.spaces || o.punct || o.dash || o.rules.length);
     var fl = { color: $("c-color").checked, font: $("c-font").checked, all: $("c-all").checked }, hasFil = fl.color || fl.font || fl.all;
     if (!hasCss && !hasTxt && !hasFil) return;
-    say("Elaboro i capitoli…");
+    say(T("Elaboro i capitoli…"));
     var dir = dirOf(opfPath), cssName = "editor-style.css";
     if (hasCss) {
       zip.file(dir + cssName, o.css.join("\n"));
@@ -593,7 +679,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
       }
       zip.file(path, ser.serializeToString(d)); done++;
     }
-    bookNote = " – " + done + " capitoli aggiornati" + (skipped ? ", " + skipped + " saltati" : "");
+    bookNote = " – " + (done === 1 ? T("1 capitolo aggiornato") : TF("{0} capitoli aggiornati", done)) + (skipped ? ", " + TF("{0} saltati", skipped) : "");
   }
 
   async function renderPreview() {
@@ -613,7 +699,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
       if (!d) d = t;
       if ((t.documentElement.textContent || "").replace(/\s+/g, " ").length >= 300) { d = t; break; }
     }
-    if (!d) { pv.textContent = "Nessun capitolo da mostrare."; return; }
+    if (!d) { pv.textContent = T("Nessun capitolo da mostrare."); return; }
     if (o.quotes || o.apos || o.dots || o.spaces || o.punct || o.dash || o.rules.length) fixDoc(d, o);
     $("pvstyle").textContent = o.css.map(function (r) {
       var k = r.indexOf("{");
@@ -704,14 +790,14 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
 
   function renderToc() {
     var box = $("toc"); box.innerHTML = "";
-    if (!toc.length) { box.textContent = "Nessuna voce di indice trovata."; return; }
+    if (!toc.length) { box.textContent = T("Nessuna voce di indice trovata."); return; }
     toc.forEach(function (e, i) {
       var row = document.createElement("div"); row.className = "tocrow"; row.style.paddingLeft = Math.min(e.depth, 4) * 14 + "px";
       var inp = document.createElement("input"); inp.type = "text"; inp.value = e.label;
       inp.addEventListener("input", function () { e.label = inp.value; tocDirty = true; });
       row.appendChild(inp);
       [["↑", -1, "Sposta su"], ["↓", 1, "Sposta giù"], ["←", "l", "Livello precedente"], ["→", "r", "Livello successivo"], ["✕", "x", "Elimina"]].forEach(function (b) {
-        var bt = document.createElement("button"); bt.type = "button"; bt.className = "btn ghost sm"; bt.textContent = b[0]; bt.title = b[2]; bt.setAttribute("aria-label", b[2]);
+        var bt = document.createElement("button"); bt.type = "button"; bt.className = "btn ghost sm"; bt.textContent = b[0]; bt.title = T(b[2]); bt.setAttribute("aria-label", T(b[2]));
         bt.addEventListener("click", function () {
           var k = b[1];
           if (k === "x") toc.splice(i, 1);
@@ -727,7 +813,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
   }
 
   async function genToc() {
-    if (!tocSrc.nav && !tocSrc.ncx) { say("Il libro non ha un file di indice da aggiornare.", true); return; }
+    if (!tocSrc.nav && !tocSrc.ncx) { say(T("Il libro non ha un file di indice da aggiornare."), true); return; }
     var spine = Array.prototype.slice.call(doc.getElementsByTagNameNS(OPF, "itemref")), out = [], its = items();
     for (var k = 0; k < spine.length; k++) {
       var it = its.filter(function (x) { return x.getAttribute("id") === spine[k].getAttribute("idref"); })[0];
@@ -737,7 +823,7 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
       var d = new DOMParser().parseFromString(await f.async("string"), "application/xml");
       if (d.getElementsByTagName("parsererror").length) continue;
       var h = d.querySelector("h1,h2,h3"), t = d.getElementsByTagName("title")[0];
-      out.push({ label: ((h && h.textContent) || (t && t.textContent) || "Capitolo " + (out.length + 1)).trim().replace(/\s+/g, " "), path: path, hash: "", depth: 0 });
+      out.push({ label: ((h && h.textContent) || (t && t.textContent) || T("Capitolo") + " " + (out.length + 1)).trim().replace(/\s+/g, " "), path: path, hash: "", depth: 0 });
     }
     toc = out; tocDirty = true; renderToc();
   }
@@ -790,61 +876,61 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
 
   async function checkBook() {
     var rp = $("report"), bad = [], warn = [], dp = new DOMParser(), its = items(), seen = {};
-    rp.textContent = "Controllo in corso…";
+    rp.textContent = T("Controllo in corso…");
     try {
       var mt = zip.file("mimetype");
-      if (!mt) bad.push("Manca il file mimetype.");
-      else if ((await mt.async("string")).trim() !== "application/epub+zip") bad.push("Il file mimetype ha un contenuto errato.");
+      if (!mt) bad.push(T("Manca il file mimetype."));
+      else if ((await mt.async("string")).trim() !== "application/epub+zip") bad.push(T("Il file mimetype ha un contenuto errato."));
       var listed = {}, ids = {};
       its.forEach(function (i) {
         var pth = resolve(i.getAttribute("href")); listed[pth] = 1; ids[i.getAttribute("id")] = 1;
-        if (!zip.file(pth)) bad.push("File dichiarato ma mancante: " + pth);
+        if (!zip.file(pth)) bad.push(TF("File dichiarato ma mancante: {0}", pth));
       });
       Object.keys(zip.files).forEach(function (pth) {
         if (zip.files[pth].dir || pth === "mimetype" || pth === opfPath || pth.indexOf("META-INF/") === 0 || listed[pth]) return;
-        warn.push("File non dichiarato nel libro: " + pth);
+        warn.push(TF("File non dichiarato nel libro: {0}", pth));
       });
       Array.prototype.forEach.call(doc.getElementsByTagNameNS(OPF, "itemref"), function (r) {
-        if (!ids[r.getAttribute("idref")]) bad.push("La sequenza di lettura cita un elemento inesistente: " + r.getAttribute("idref"));
+        if (!ids[r.getAttribute("idref")]) bad.push(TF("La sequenza di lettura cita un elemento inesistente: {0}", r.getAttribute("idref")));
       });
       var chapters = its.filter(function (i) { return i.getAttribute("media-type") === "application/xhtml+xml"; });
       for (var c = 0; c < chapters.length; c++) {
         var cp = resolve(chapters[c].getAttribute("href")), f = zip.file(cp);
         if (!f) continue;
         var d = dp.parseFromString(await f.async("string"), "application/xml");
-        if (d.getElementsByTagName("parsererror").length) { bad.push("Codice non valido (XML) in " + cp); continue; }
+        if (d.getElementsByTagName("parsererror").length) { bad.push(TF("Codice non valido (XML) in {0}", cp)); continue; }
         Array.prototype.forEach.call(d.querySelectorAll("img[src],link[href],a[href]"), function (e) {
           var u = e.getAttribute("src") || e.getAttribute("href") || "";
           if (!u || u.charAt(0) === "#" || /^[a-z][a-z0-9+.-]*:/i.test(u) || seen[cp + u]) return;
           seen[cp + u] = 1;
-          if (!zip.file(absPath(u, cp).path)) bad.push("Collegamento rotto in " + cp + ": " + u);
+          if (!zip.file(absPath(u, cp).path)) bad.push(TF("Collegamento rotto in {0}: {1}", cp, u));
         });
       }
-      if (!dcv("title")[0]) warn.push("Manca il titolo.");
-      if (!dcv("creator")[0]) warn.push("Manca l'autore.");
-      if (!dcv("language")[0]) warn.push("Manca la lingua.");
-      if (!coverItem()) warn.push("Manca la copertina.");
-      if (!tocSrc.nav && !tocSrc.ncx) warn.push("Manca il file dell'indice.");
-    } catch (e) { rp.textContent = "Non sono riuscito a completare il controllo."; return; }
+      if (!dcv("title")[0]) warn.push(T("Manca il titolo."));
+      if (!dcv("creator")[0]) warn.push(T("Manca l'autore."));
+      if (!dcv("language")[0]) warn.push(T("Manca la lingua."));
+      if (!coverItem()) warn.push(T("Manca la copertina."));
+      if (!tocSrc.nav && !tocSrc.ncx) warn.push(T("Manca il file dell'indice."));
+    } catch (e) { rp.textContent = T("Non sono riuscito a completare il controllo."); return; }
     function show(title, list, cls) {
       if (!list.length) return;
       var h = document.createElement("div"); h.style.fontWeight = "600"; h.style.marginTop = "8px"; h.className = cls; h.textContent = title + " (" + list.length + ")";
       var ul = document.createElement("ul");
       list.slice(0, 30).forEach(function (t) { var li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
-      if (list.length > 30) { var m = document.createElement("li"); m.textContent = "…e altri " + (list.length - 30); ul.appendChild(m); }
+      if (list.length > 30) { var m = document.createElement("li"); m.textContent = TF("…e altri {0}", list.length - 30); ul.appendChild(m); }
       rp.appendChild(h); rp.appendChild(ul);
     }
     rp.innerHTML = "";
-    if (!bad.length && !warn.length) { rp.textContent = "✓ Nessun problema trovato."; return; }
-    show("Problemi", bad, "bad"); show("Avvisi", warn, "");
+    if (!bad.length && !warn.length) { rp.textContent = T("✓ Nessun problema trovato."); return; }
+    show(T("Problemi"), bad, "bad"); show(T("Avvisi"), warn, "");
   }
 
   function xhtmlItems() { return items().filter(function (i) { return i.getAttribute("media-type") === "application/xhtml+xml"; }); }
 
   async function countRules() {
     var o = readOpts(), out = $("r-out");
-    if (!o.rules.length) { out.textContent = "Scrivi almeno un testo da cercare."; return; }
-    out.textContent = "Conto…";
+    if (!o.rules.length) { out.textContent = T("Scrivi almeno un testo da cercare."); return; }
+    out.textContent = T("Conto…");
     var total = 0, chs = xhtmlItems();
     for (var i = 0; i < chs.length; i++) {
       var f = zip.file(resolve(chs[i].getAttribute("href")));
@@ -854,12 +940,12 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
       var w = d.createTreeWalker(d.documentElement, NodeFilter.SHOW_TEXT), n;
       while ((n = w.nextNode())) o.rules.forEach(function (r) { var m = n.nodeValue.match(r.re); if (m) total += m.length; });
     }
-    out.textContent = total + " occorrenze trovate (in ogni capitolo, dentro lo stesso blocco di testo).";
+    out.textContent = TF("{0} occorrenze trovate (in ogni capitolo, dentro lo stesso blocco di testo).", total);
   }
 
   async function stats() {
     var out = $("stats"), words = 0, nch = 0, chs = xhtmlItems();
-    out.textContent = "Calcolo…";
+    out.textContent = T("Calcolo…");
     for (var i = 0; i < chs.length; i++) {
       var pth = resolve(chs[i].getAttribute("href")), f = zip.file(pth);
       if (!f || pth === tocSrc.nav) continue;
@@ -870,41 +956,162 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
       if (w > 0) { words += w; nch++; }
     }
     var mins = Math.round(words / 230), h = Math.floor(mins / 60);
-    out.textContent = "Capitoli con testo: " + nch + " · Parole: " + words.toLocaleString("it-IT") + " · Lettura: circa " + (h ? h + " h " : "") + (mins % 60) + " min (a 230 parole al minuto)";
+    out.textContent = TF("Capitoli con testo: {0} · Parole: {1} · Lettura: circa {2} (a 230 parole al minuto)", nch, words.toLocaleString(LANG === "it" ? "it-IT" : "en-US"), (h ? h + " h " : "") + (mins % 60) + " min");
   }
 
-  var PIDS = ["s-margin", "s-line", "s-gap", "s-indent", "s-size", "s-align", "s-hyph", "s-font", "s-drop", "s-heads", "t-quotes", "t-apos", "t-dots", "t-spaces", "t-punct", "t-dash", "c-color", "c-font", "c-all", "r-del", "r-rep", "r-case", "r-rx", "f-tpl", "rename"];
+  var PIDS = ["s-margin", "s-line", "s-gap", "s-indent", "s-size", "s-align", "s-hyph", "s-font", "s-drop", "s-heads", "t-quotes", "t-apos", "t-dots", "t-spaces", "t-punct", "t-dash", "c-color", "c-font", "c-all", "r-del", "r-rep", "r-case", "r-rx", "sp-names", "f-tpl", "rename"];
   function presets() { try { return JSON.parse(localStorage.getItem("epubPresets") || "{}"); } catch (e) { return {}; } }
   function savePresets(ps) { try { localStorage.setItem("epubPresets", JSON.stringify(ps)); return true; } catch (e) { return false; } }
   function listPresets() {
     var sel = $("p-sel"), ps = presets(), ks = Object.keys(ps);
     sel.innerHTML = "";
     if (!ks.length) ks = [""];
-    ks.forEach(function (k) { var op = document.createElement("option"); op.value = k; op.textContent = k || "Nessun preset salvato"; sel.appendChild(op); });
+    ks.forEach(function (k) { var op = document.createElement("option"); op.value = k; op.textContent = k || T("Nessun preset salvato"); sel.appendChild(op); });
   }
   $("p-save").addEventListener("click", function () {
     var nm = $("p-name").value.trim();
-    if (!nm) { say("Scrivi un nome per il preset.", true); return; }
+    if (!nm) { say(T("Scrivi un nome per il preset."), true); return; }
     var data = {}, ps = presets();
     PIDS.forEach(function (id) { var el = $(id); data[id] = el.type === "checkbox" ? el.checked : el.value; });
     ps[nm] = data;
-    if (savePresets(ps)) say("Preset salvato: " + nm); else say("Non riesco a salvare il preset in questo browser.", true);
+    if (savePresets(ps)) say(TF("Preset salvato: {0}", nm)); else say(T("Non riesco a salvare il preset in questo browser."), true);
     listPresets(); $("p-sel").value = nm;
   });
   $("p-apply").addEventListener("click", function () {
     var d = presets()[$("p-sel").value];
-    if (!d) { say("Scegli un preset salvato.", true); return; }
+    if (!d) { say(T("Scegli un preset salvato."), true); return; }
     PIDS.forEach(function (id) { var el = $(id); if (id in d) { if (el.type === "checkbox") el.checked = d[id]; else el.value = d[id]; } });
-    renderPreview(); say("Preset applicato.");
+    renderPreview(); say(T("Preset applicato."));
   });
   $("p-del").addEventListener("click", function () {
-    var ps = presets(); delete ps[$("p-sel").value]; savePresets(ps); listPresets(); say("Preset eliminato.");
+    var ps = presets(); delete ps[$("p-sel").value]; savePresets(ps); listPresets(); say(T("Preset eliminato."));
   });
   listPresets();
   $("pv-toggle").addEventListener("click", function () {
     var box = $("pvbox"), c = box.classList.toggle("collapsed");
-    this.textContent = c ? "Mostra" : "Nascondi"; this.setAttribute("aria-expanded", c ? "false" : "true");
+    this.textContent = T(c ? "Mostra" : "Nascondi"); this.setAttribute("aria-expanded", c ? "false" : "true");
   });
+  var SP = { h: {}, loading: {}, f: null };
+  var ELI = {}; "l d un all dell dall nell sull quest quell bell senz anch tutt mezz com dov cos ch nessun buon sant gran qual cent mill trent quarant cinquant sessant settant ottant novant tant quant nient altr c m t s v n".split(" ").forEach(function (w) { ELI[w] = 1; });
+
+  function loadScript(src) {
+    return new Promise(function (ok, ko) {
+      var e = document.createElement("script"); e.src = src; e.onload = ok;
+      e.onerror = function () { ko(new Error(TF("file mancante: {0}", src))); };
+      document.head.appendChild(e);
+    });
+  }
+  function spellEngine(lg) {
+    if (SP.h[lg]) return Promise.resolve(SP.h[lg]);
+    if (!SP.loading[lg]) SP.loading[lg] = (async function () {
+      if (!window.HunspellAsm) await loadScript("hunspell.bundle.js");
+      var res = await Promise.all([fetch("dict/" + lg + ".aff"), fetch("dict/" + lg + ".dic")]);
+      if (!res[0].ok || !res[1].ok) throw new Error(T("dizionario non trovato"));
+      var b = await Promise.all(res.map(function (r) { return r.arrayBuffer(); }));
+      if (!SP.f) SP.f = await window.HunspellAsm.loadModule();
+      SP.h[lg] = SP.f.create(SP.f.mountBuffer(new Uint8Array(b[0]), lg + ".aff"), SP.f.mountBuffer(new Uint8Array(b[1]), lg + ".dic"));
+      return SP.h[lg];
+    })().catch(function (e) { SP.loading[lg] = null; throw e; });
+    return SP.loading[lg];
+  }
+  function ignored() { try { return JSON.parse(localStorage.getItem("epubIgnore") || "{}"); } catch (e) { return {}; } }
+  function saveIgnored(o) { try { localStorage.setItem("epubIgnore", JSON.stringify(o)); } catch (e) {} }
+
+  function spellSuggest(h, w) {
+    var out = [], m = w.match(/^[a-zà-ÿ](\p{Lu}\p{Ll}+)$/u);
+    if (m) { out.push(m[1]); out.push(m[1].toLowerCase()); }
+    h.suggest(w).forEach(function (x) { out.push(x); });
+    var seen = {};
+    return out.filter(function (x) { if (!x || x === w || seen[x]) return false; seen[x] = 1; return true; }).slice(0, 5);
+  }
+
+  function spellRow(w, info, sug) {
+    var row = document.createElement("div"); row.className = "sprow"; row.setAttribute("data-w", w);
+    var lab = document.createElement("label"); lab.className = "check";
+    var cb = document.createElement("input"); cb.type = "checkbox"; cb.className = "sp-on";
+    var st = document.createElement("strong"); st.textContent = w;
+    var ct = document.createElement("span"); ct.className = "small"; ct.textContent = info.n > 1 ? TF("({0} volte)", info.n) : T("(1 volta)");
+    lab.appendChild(cb); lab.appendChild(document.createTextNode(" ")); lab.appendChild(st); lab.appendChild(document.createTextNode(" ")); lab.appendChild(ct);
+    var cx = document.createElement("div"); cx.className = "small ctx";
+    var mk = document.createElement("mark"); mk.textContent = w;
+    cx.appendChild(document.createTextNode("…" + info.before)); cx.appendChild(mk); cx.appendChild(document.createTextNode(info.after + "…"));
+    var inp = document.createElement("input"); inp.type = "text"; inp.className = "sp-to"; inp.value = sug[0] || ""; inp.setAttribute("aria-label", TF("Correzione per {0}", w));
+    inp.placeholder = T("Scrivi la correzione");
+    inp.addEventListener("input", function () { cb.checked = inp.value.trim() !== ""; });
+    var chips = document.createElement("div"); chips.className = "chips";
+    sug.forEach(function (x) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "btn ghost sm"; b.textContent = x;
+      b.addEventListener("click", function () { inp.value = x; cb.checked = true; renderPreview(); });
+      chips.appendChild(b);
+    });
+    var ig = document.createElement("button"); ig.type = "button"; ig.className = "btn ghost sm"; ig.textContent = T("Ignora");
+    ig.addEventListener("click", function () {
+      var o = ignored(); o[w.toLowerCase()] = 1; saveIgnored(o); row.remove(); renderPreview();
+    });
+    chips.appendChild(ig);
+    row.appendChild(lab); row.appendChild(cx); row.appendChild(inp); row.appendChild(chips);
+    return row;
+  }
+
+  async function spellRun() {
+    var out = $("sp-out"), list = $("sp-list"), h, lg = $("sp-lang").value;
+    list.innerHTML = ""; $("sp-bulk").style.display = "none";
+    try { out.textContent = T("Carico il dizionario…"); h = await spellEngine(lg); }
+    catch (e) { out.textContent = TF("Non riesco a caricare il dizionario ({0}).", e.message || T("errore")); return; }
+    var skipNames = $("sp-names").checked, ign = ignored(), found = {}, verdict = {}, chs = xhtmlItems();
+    var TOK = /[\p{L}\p{M}]+(?:['’][\p{L}\p{M}]+)*/gu;
+    function wrong(p, last) {
+      if (p.length < 3 || ign[p.toLowerCase()]) return false;
+      if (!last && ELI[p.toLowerCase()]) return false;
+      if (p === p.toUpperCase() && p !== p.toLowerCase()) return false;
+      if (verdict[p] === undefined) {
+        var ok = h.spell(p);
+        verdict[p] = !ok && !(skipNames && /^\p{Lu}\p{Ll}+$/u.test(p));
+      }
+      return verdict[p];
+    }
+    for (var i = 0; i < chs.length; i++) {
+      out.textContent = TF("Controllo il testo… ({0}/{1})", i + 1, chs.length);
+      await new Promise(function (r) { setTimeout(r, 0); });
+      var pth = resolve(chs[i].getAttribute("href")), f = zip.file(pth);
+      if (!f || pth === tocSrc.nav) continue;
+      var d = new DOMParser().parseFromString(await f.async("string"), "application/xml");
+      if (d.getElementsByTagName("parsererror").length) continue;
+      var w = d.createTreeWalker(d.documentElement, NodeFilter.SHOW_TEXT), n;
+      while ((n = w.nextNode())) {
+        if (n.parentNode.closest && n.parentNode.closest("script,style")) continue;
+        var t = n.nodeValue, m;
+        TOK.lastIndex = 0;
+        while ((m = TOK.exec(t))) {
+          var parts = lg === "en" ? [m[0].replace(/’/g, "'")] : m[0].split(/['’]/), pos = m.index;
+          for (var k = 0; k < parts.length; k++) {
+            if (wrong(parts[k], k === parts.length - 1)) {
+              var e = found[parts[k]] || (found[parts[k]] = { n: 0, before: t.slice(Math.max(0, pos - 35), pos).replace(/\s+/g, " "), after: t.slice(pos + parts[k].length, pos + parts[k].length + 35).replace(/\s+/g, " ") });
+              e.n++;
+            }
+            pos += parts[k].length + 1;
+          }
+        }
+      }
+    }
+    var words = Object.keys(found).sort(function (a, b) { return found[a].n - found[b].n || a.localeCompare(b, LANG); });
+    if (!words.length) { out.textContent = T("✓ Nessuna parola sospetta trovata."); return; }
+    var shown = words.slice(0, 300);
+    for (var j = 0; j < shown.length; j++) {
+      if (j % 25 === 0) { out.textContent = TF("Preparo i suggerimenti… ({0}/{1})", j, shown.length); await new Promise(function (r) { setTimeout(r, 0); }); }
+      list.appendChild(spellRow(shown[j], found[shown[j]], spellSuggest(h, shown[j])));
+    }
+    out.textContent = words.length > shown.length ? TF("{0} parole sospette (mostro le prime {1}, dalle più rare). Spunta quelle da correggere e controlla la correzione proposta; i nomi propri puoi ignorarli.", words.length, shown.length) : TF("{0} parole sospette. Spunta quelle da correggere e controlla la correzione proposta; i nomi propri puoi ignorarli.", words.length);
+    $("sp-bulk").style.display = "flex";
+  }
+  function spellAll(on) {
+    document.querySelectorAll("#sp-list .sprow").forEach(function (r) { r.querySelector(".sp-on").checked = on && r.querySelector(".sp-to").value.trim() !== ""; });
+    renderPreview();
+  }
+  $("sp-run").addEventListener("click", spellRun);
+  $("sp-all").addEventListener("click", function () { spellAll(true); });
+  $("sp-none").addEventListener("click", function () { spellAll(false); });
+  $("sp-reset").addEventListener("click", function () { saveIgnored({}); say(T("Parole ignorate dimenticate. Rilancia il controllo.")); });
   $("r-count").addEventListener("click", countRules);
   $("stats-btn").addEventListener("click", stats);
   $("check").addEventListener("click", checkBook);
@@ -917,6 +1124,19 @@ input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{outl
   $("another").addEventListener("click", function () {
     $("book").style.display = "none"; $("drop").style.display = ""; zip = doc = meta = null; say("");
   });
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-l]"), function (b) {
+    b.addEventListener("click", function () { setLang(b.getAttribute("data-l"), false, true); $("onboard").hidden = true; });
+  });
+  var savedLang = null; try { savedLang = localStorage.getItem(LKEY); } catch (e) {}
+  if (savedLang === "it" || savedLang === "en") setLang(savedLang, true, false);
+  else {
+    var dl = detectLang();
+    setLang(dl, true, false);
+    Array.prototype.forEach.call(document.querySelectorAll("#onboard [data-l]"), function (b) { b.className = "btn" + (b.getAttribute("data-l") === dl ? "" : " ghost"); });
+    $("onboard").hidden = false;
+    var fb = document.querySelector("#onboard .btn:not(.ghost)"); if (fb) fb.focus();
+  }
 })();
 </script>
 <script>if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) { navigator.serviceWorker.register("sw.js").catch(function () {}); }</script>
